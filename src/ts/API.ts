@@ -8,6 +8,7 @@ import {
   TagPostList,
   AllSupportingPlan,
   SupportInfo,
+  CommentData,
 } from './CrawlResult.d'
 
 class API {
@@ -148,6 +149,23 @@ class API {
 
   static async getPost(postId: string): Promise<Post> {
     const url = `https://api.fanbox.cc/post.info?postId=${postId}`
+    return this.request(url)
+  }
+
+  /** 获取投稿的评论列表。offset 用于分页，limit 是单次获取的数量 */
+  static async getPostComments(
+    postId: string,
+    offset = 0,
+    limit = 50,
+  ): Promise<{
+    body: {
+      commentList: {
+        items: CommentData[]
+        nextUrl: string | null
+      }
+    }
+  }> {
+    const url = `https://api.fanbox.cc/post.getComments?postId=${postId}&offset=${offset}&limit=${limit}`
     return this.request(url)
   }
 }

@@ -8,11 +8,12 @@ interface CommentData {
   likeCount: number
   isLiked: boolean
   isOwn: boolean
+  // 用户被删除时，user 可能为 null
   user: {
     userId: string
     name: string
     iconUrl: string
-  }
+  } | null
   replies: CommentData[]
 }
 
@@ -436,6 +437,7 @@ interface ListFollowing {
 }
 
 export {
+  CommentData,
   PostBody,
   Post,
   PostListItem,

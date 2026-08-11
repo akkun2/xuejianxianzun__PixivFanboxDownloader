@@ -114,6 +114,28 @@ class Tools {
     }
     return url
   }
+
+  static escapeHtml(value: string) {
+    return value.replace(/[&<>"']/g, (character) => {
+      const entities: { [key: string]: string } = {
+        '&': '&amp;',
+        '<': '&lt;',
+        '>': '&gt;',
+        '"': '&quot;',
+        "'": '&#39;',
+      }
+      return entities[character]
+    })
+  }
+
+  // 下载器自己生成的 txt 文件没有 id，所以这里需要自己给它生成一个 id
+  // 使用时间戳并不保险，因为有时候代码执行太快，会生成重复的时间戳。所以后面加上随机字符
+  static createFileId() {
+    return (
+      new Date().getTime().toString() +
+      Math.random().toString(16).replace('.', '')
+    )
+  }
 }
 
 export { Tools }

@@ -4,9 +4,10 @@ import { ImageData, PostBody } from '../CrawlResult'
 import { Config } from '../Config'
 import { settings } from '../setting/Settings'
 import { fileName } from '../FileName'
+import { renderCommentsHtml } from '../RenderCommentsHtml'
 
 class CreateHtmlDocument {
-  public create(data: PostBody, result: ResultMeta) {
+  public async create(data: PostBody, result: ResultMeta) {
     const postUrl = `https://www.fanbox.cc/@${encodeURIComponent(
       data.creatorId,
     )}/posts/${encodeURIComponent(data.id)}`
@@ -162,20 +163,22 @@ class CreateHtmlDocument {
       }
     }
 
+    const commentsHtml = await renderCommentsHtml.render(data)
+
     return `<!doctype html>
 <html lang="en">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<meta http-equiv="Content-Security-Policy" content="default-src 'none'; img-src 'self' https: http:; media-src 'self' https: http: file: blob: data:; style-src 'unsafe-inline'; script-src 'none'; frame-src 'none'; object-src 'none'; form-action 'none';">
-<title>${this.escapeHtml(data.title)}</title>
-<style>body{max-width:800px;margin:0 auto;padding:24px;font-family:Arial,sans-serif;line-height:1.7;color:#222;overflow-wrap:anywhere}img,video{max-width:100%;height:auto}video,audio{display:block;margin:0 auto}audio{width:80%;max-width:100%}.media{margin:1.5em 0;text-align:center}.media-name{margin:0 0 .5em}a{color:#06c}figure{margin:1.5em 0;text-align: center;}h1{line-height:1.3}.meta{color:#666;font-size:.9em}</style>
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; img-src 'self' https: http: data:; media-src 'self' https: http: file: blob: data:; style-src 'unsafe-inline'; script-src 'none'; frame-src 'none'; object-src 'none'; form-action 'none';">
+<title>${Tools.escapeHtml(data.title)}</title>
+<style>body{max-width:800px;margin:0 auto;padding:24px;font-family:Arial,sans-serif;line-height:1.7;color:#222;overflow-wrap:anywhere}img,video{max-width:100%;height:auto}video,audio{display:block;margin:0 auto}audio{width:80%;max-width:100%}.media{margin:1.5em 0;text-align:center}.media-name{margin:0 0 .5em}a{color:#06c}figure{margin:1.5em 0;text-align: center;}h1{line-height:1.3}.meta{color:#666;font-size:.9em}.comments{margin-top:2em;border-top:1px solid #ddd;padding-top:1em}.comment{display:flex;gap:.6em;margin:1em 0}.comment-icon{width:32px;height:32px;border-radius:50%;flex-shrink:0}.comment-main{flex:1;min-width:0}.comment-meta{color:#666;font-size:.85em;margin:0 0 .3em}.comment-body{white-space:pre-line}.comment-replies{margin-left:1.5em}</style>
 </head>
 <body>
-<header><h1>${this.escapeHtml(data.title)}</h1><p class="meta"><a href="${this.escapeHtml(
+<header><h1>${Tools.escapeHtml(data.title)}</h1><p class="meta"><a href="${Tools.escapeHtml(
       safePostUrl,
-    )}" rel="noopener noreferrer">${this.escapeHtml(safePostUrl)}</a></p></header>
-<main>${coverHtml}${body}</main>
+    )}" rel="noopener noreferrer">${Tools.escapeHtml(safePostUrl)}</a></p></header>
+<main>${coverHtml}${body}${commentsHtml}</main>
 </body>
 </html>`
   }
@@ -199,7 +202,7 @@ class CreateHtmlDocument {
     for (let i = 0; i < points.length - 1; i++) {
       const start = points[i]
       const end = points[i + 1]
-      let part = this.escapeHtml(text.slice(start, end))
+      let part = Tools.escapeHtml(text.slice(start, end))
       const bold = styles.some(
         (style) => start >= style.offset && end <= style.offset + style.length,
       )
@@ -211,7 +214,7 @@ class CreateHtmlDocument {
       }
       const url = link && this.getSafeExternalUrl(link.url)
       if (url) {
-        part = `<a href="${this.escapeHtml(
+        part = `<a href="${Tools.escapeHtml(
           url,
         )}" rel="noopener noreferrer">${part}</a>`
       }
@@ -293,7 +296,7 @@ class CreateHtmlDocument {
   }
 
   private renderImageSource(src: string, alt: string) {
-    return `<figure><img src="${this.escapeHtml(src)}" alt="${this.escapeHtml(
+    return `<figure><img src="${Tools.escapeHtml(src)}" alt="${Tools.escapeHtml(
       alt,
     )}"></figure>`
   }
@@ -305,16 +308,16 @@ class CreateHtmlDocument {
     local: boolean = false,
   ) {
     const safeUrl = this.getSafeExternalUrl(url)
-    const content = this.escapeHtml(text)
+    const content = Tools.escapeHtml(text)
     if (local) {
-      return `<p class="${className}"><a href="${this.escapeHtml(
+      return `<p class="${className}"><a href="${Tools.escapeHtml(
         url,
       )}" rel="noopener noreferrer">${content}</a></p>`
     }
     return safeUrl
-      ? `<p class="${className}"><a href="${this.escapeHtml(
-          safeUrl,
-        )}" rel="noopener noreferrer">${content}</a></p>`
+      ? `<p class="${className}"><a href="${Tools.escapeHtml(
+        safeUrl,
+      )}" rel="noopener noreferrer">${content}</a></p>`
       : content
         ? `<p class="${className}">${content}</p>`
         : ''
@@ -356,8 +359,8 @@ class CreateHtmlDocument {
       return this.renderExternalLink(url, text, 'attachment', local)
     }
 
-    const safeSource = this.escapeHtml(source)
-    const safeText = this.escapeHtml(text)
+    const safeSource = Tools.escapeHtml(source)
+    const safeText = Tools.escapeHtml(text)
 
     // 为视频和音频文件生成对应的 html 标签，以便用户可以直接播放它们。这也使得体验与 fanbox 网页里的体验更接近。
     // PS：fanbox 的视频格式有 3 种：'mp4','mov','avi'，只对 mp4 生成 video 标签。这是因为 mov 和 avi 是容器格式，其中的视频编码或音频编码不固定，浏览器可能不支持某些编码，会导致视频无法播放。而且浏览器对 avi 容器的支持很差。
@@ -388,16 +391,16 @@ class CreateHtmlDocument {
 
     while ((match = urlReg.exec(text)) !== null) {
       const urlText = match[0]
-      html += this.escapeHtml(text.slice(previousIndex, match.index))
+      html += Tools.escapeHtml(text.slice(previousIndex, match.index))
 
       const url = this.getSafeExternalUrl(urlText)
       html += url
-        ? `<a href="${this.escapeHtml(url)}" rel="noopener noreferrer">${this.escapeHtml(urlText)}</a>`
-        : this.escapeHtml(urlText)
+        ? `<a href="${Tools.escapeHtml(url)}" rel="noopener noreferrer">${Tools.escapeHtml(urlText)}</a>`
+        : Tools.escapeHtml(urlText)
       previousIndex = match.index + urlText.length
     }
 
-    return html + this.escapeHtml(text.slice(previousIndex))
+    return html + Tools.escapeHtml(text.slice(previousIndex))
   }
 
   private sanitizeEntryHtml(
@@ -477,8 +480,8 @@ class CreateHtmlDocument {
         const downloadedImage =
           tag === 'img'
             ? result.files.find(
-                (file) => file.fileID === this.getImageFileId(sourceUrls[0]),
-              )
+              (file) => file.fileID === this.getImageFileId(sourceUrls[0]),
+            )
             : undefined
         if (downloadedImage) {
           const imagePath = fileName.getFileName({
@@ -510,19 +513,6 @@ class CreateHtmlDocument {
       sanitizeNode(child)
     }
     return document.body.innerHTML
-  }
-
-  private escapeHtml(value: string) {
-    return value.replace(/[&<>"']/g, (character) => {
-      const entities: { [key: string]: string } = {
-        '&': '&amp;',
-        '<': '&lt;',
-        '>': '&gt;',
-        '"': '&quot;',
-        "'": '&#39;',
-      }
-      return entities[character]
-    })
   }
 
   private getImageFileId(url: string) {

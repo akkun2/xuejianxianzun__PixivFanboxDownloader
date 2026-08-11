@@ -47,6 +47,7 @@ class FormSettings {
       'postDate',
       'saveLink',
       'saveText',
+      'saveComment',
       'autoStartDownload',
       'showAdvancedSettings',
       'bgDisplay',
