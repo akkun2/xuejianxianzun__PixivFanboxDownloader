@@ -54,10 +54,13 @@ class SaveData {
       files: [],
       textContent: {
         fileID: '',
-        name: 'links-' + data.id,
+        name: data.id,
         ext: 'txt',
         size: null,
         index: 0,
+        // text 里的内容有两个来源：外链和正文文本。
+        // 在这个模块里，text 里保存的内容不会受“保存投稿中的文字”设置的影响。虽然这个设置可以选择纯文本或者 HTML，但是这个模块里的 text 的内容总是值为“纯文本”时的内容。
+        // 如果这个设置的值是 HTML，那么会在下载时生成真正的 HTML 代码。此时并不会使用这个模块里的 text 内容。
         text: [],
         url: '',
         retryUrl: null,
@@ -337,16 +340,22 @@ class SaveData {
       result.textContent.fileID ||= this.createFileId()
     }
 
+    // 检查文本里是否含有网址
+    let findURL = result.textContent.text.some((text) =>
+      /https?:\/\//.test(text),
+    )
+    if (findURL) {
+      // 如果有外链，则在文件名前面添加 links-
+      result.textContent.name = 'links-' + result.textContent.name
+      msgBox.once('tipLinktext', lang.transl('_提示会把外链保存到文件'))
+    }
+
     if (
       result.textContent.ext === 'txt' &&
       result.textContent.text.length > 0
     ) {
-      const findURL = result.textContent.text.some((text) =>
-        /https?:\/\//.test(text),
-      )
-      if (findURL) {
-        msgBox.once('tipLinktext', lang.transl('_提示有外链保存到txt'))
-      }
+      // 对于 TXT 文件，在内容的开头添加文章标题
+      result.textContent.text.unshift(data.title + '\r\n')
     }
 
     store.addResult(result)

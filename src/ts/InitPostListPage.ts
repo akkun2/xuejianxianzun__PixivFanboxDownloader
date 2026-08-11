@@ -43,6 +43,10 @@ class InitPostListPage extends InitPageBase {
     const creatorId = API.getCreatorId(location.href)
 
     await this.getPostListURLs(creatorId)
+    if (this.postListURLs.length === 0) {
+      log.warning(lang.transl('_没有找到投稿列表的提示'))
+      return this.FetchPostListFinished()
+    }
 
     log.log(lang.transl('_开始获取投稿列表'))
     this.FetchPostList()

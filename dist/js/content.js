@@ -2438,6 +2438,10 @@ class InitPostListPage extends _InitPageBase__WEBPACK_IMPORTED_MODULE_3__.InitPa
         this.postListURLs = [];
         const creatorId = _API__WEBPACK_IMPORTED_MODULE_4__.API.getCreatorId(location.href);
         await this.getPostListURLs(creatorId);
+        if (this.postListURLs.length === 0) {
+            _Log__WEBPACK_IMPORTED_MODULE_5__.log.warning(_Lang__WEBPACK_IMPORTED_MODULE_0__.lang.transl('_没有找到投稿列表的提示'));
+            return this.FetchPostListFinished();
+        }
         _Log__WEBPACK_IMPORTED_MODULE_5__.log.log(_Lang__WEBPACK_IMPORTED_MODULE_0__.lang.transl('_开始获取投稿列表'));
         this.FetchPostList();
     }
@@ -3597,7 +3601,7 @@ class SaveData {
             files: [],
             textContent: {
                 fileID: '',
-                name: 'links-' + data.id,
+                name: data.id,
                 ext: 'txt',
                 size: null,
                 index: 0,
@@ -3848,12 +3852,17 @@ class SaveData {
             result.textContent.htmlData = data;
             (_b = result.textContent).fileID || (_b.fileID = this.createFileId());
         }
+        // 检查文本里是否含有网址
+        let findURL = result.textContent.text.some((text) => /https?:\/\//.test(text));
+        if (findURL) {
+            // 如果有外链，则在文件名前面添加 links-
+            result.textContent.name = 'links-' + result.textContent.name;
+            _MsgBox__WEBPACK_IMPORTED_MODULE_5__.msgBox.once('tipLinktext', _Lang__WEBPACK_IMPORTED_MODULE_4__.lang.transl('_提示会把外链保存到文件'));
+        }
         if (result.textContent.ext === 'txt' &&
             result.textContent.text.length > 0) {
-            const findURL = result.textContent.text.some((text) => /https?:\/\//.test(text));
-            if (findURL) {
-                _MsgBox__WEBPACK_IMPORTED_MODULE_5__.msgBox.once('tipLinktext', _Lang__WEBPACK_IMPORTED_MODULE_4__.lang.transl('_提示有外链保存到txt'));
-            }
+            // 对于 TXT 文件，在内容的开头添加文章标题
+            result.textContent.text.unshift(data.title + '\r\n');
         }
         _Store__WEBPACK_IMPORTED_MODULE_1__.store.addResult(result);
     }
@@ -7059,12 +7068,12 @@ const langText = {
         'Задача начата',
     ],
     _抓取结果为零: [
-        '抓取完毕，但没有找到符合筛选条件的文件。',
-        '擷取完畢，但沒有找到符合篩選條件的檔案。',
-        'Crawl finished but did not find files that match the filter criteria.',
-        'フィルタ条件で検索しましたが、該当するファイルは見つかりませんでした。',
-        '긁어오기가 완료되었지만 필터 조건과 일치하는 파일을 찾지 못했습니다.',
-        'Сканирование завершено, но файлы, соответствующие условиям фильтра, не найдены.',
+        '抓取完毕，但是没有找到符合筛选条件的文件。通常这是因为投稿或文件不符合某些筛选条件的要求。你可以在顶部日志里查看详细信息。',
+        '擷取完畢，但是沒有找到符合篩選條件的檔案。通常這是因為投稿或檔案不符合某些篩選條件。你可以在頂部日誌中查看詳細資訊。',
+        'Crawling is complete, but no files matching the filter criteria were found. This is usually because the post or files do not meet one or more filter conditions. You can view the details in the log at the top.',
+        'クロールが完了しましたが、フィルター条件に一致するファイルは見つかりませんでした。通常、投稿またはファイルがいずれかのフィルター条件を満たしていないことが原因です。詳細は上部のログで確認できます。',
+        '크롤링이 완료되었지만 필터 조건에 맞는 파일을 찾지 못했습니다. 일반적으로 게시물 또는 파일이 하나 이상의 필터 조건을 충족하지 않아서입니다. 자세한 내용은 상단 로그에서 확인할 수 있습니다.',
+        'Сканирование завершено, но файлы, соответствующие условиям фильтра, не найдены. Обычно это происходит потому, что публикация или файлы не соответствуют одному или нескольким условиям фильтра. Подробности можно посмотреть в журнале в верхней части страницы.',
     ],
     _当前任务尚未完成: [
         '当前任务尚未完成',
@@ -8606,13 +8615,13 @@ So the file name set by the downloader is lost, and the file name becomes the la
         'Исправлена ошибка сканирования из-за изменений данных API.',
     ],
     _任一: ['任一', '任一', 'One', '何れか', '하나만', 'Любой'],
-    _提示有外链保存到txt: [
-        '这次的抓取结果里有一些外部链接，下载器会把它们保存到 TXT 文件里，请手动处理。',
-        '這次的抓取結果裡有一些外部連結，下載器會把它們儲存到 TXT 檔案裡，請手動處理。',
-        'There are some external links in the crawling results this time. The downloader will save them into TXT files. Please handle them manually.',
-        '今回のクロール結果には外部リンクがいくつか含まれます。ダウンローダーはそれらをTXTファイルに保存します。手動で処理してください。',
-        '이번에는 크롤링 결과에 외부 링크가 몇 개 있습니다. 다운로더가 이를 TXT 파일로 저장합니다. 수동으로 처리해 주세요.',
-        'В результатах сканирования на этот раз есть внешние ссылки. Загрузчик сохранит их в TXT-файлы. Пожалуйста, обработайте их вручную.',
+    _提示会把外链保存到文件: [
+        '这次的抓取结果里有一些网址，它们通常是外部链接。下载器会把它们保存到以“links-”开头的文件里，你可以手动处理。',
+        '這次的擷取結果裡有一些網址，它們通常是外部連結。下載器會把它們儲存到以「links-」開頭的檔案裡，你可以手動處理。',
+        'This crawl result contains some URLs, which are usually external links. The downloader will save them in a file whose name begins with "links-". You can handle them manually.',
+        '今回のクロール結果には、通常外部リンクである URL がいくつか含まれています。ダウンローダーはそれらを「links-」で始まるファイルに保存します。手動で処理できます。',
+        '이번 크롤링 결과에는 일반적으로 외부 링크인 URL이 일부 포함되어 있습니다. 다운로더는 이를 "links-"로 시작하는 파일에 저장하며, 수동으로 처리할 수 있습니다.',
+        'В результатах этого сканирования есть несколько URL-адресов, обычно это внешние ссылки. Загрузчик сохранит их в файл, имя которого начинается с "links-". Вы можете обработать их вручную.',
     ],
     _下载器会等待几分钟然后再继续抓取: [
         '下载器会等待几分钟，然后再继续抓取。',
@@ -8752,6 +8761,14 @@ So the file name set by the downloader is lost, and the file name becomes the la
         '1日のダウンロード<span class="key">ファイルサイズ</span>制限',
         '일일 다운로드 <span class="key">파일 크기</span> 제한',
         'Ограничение на <span class="key">размер</span> файлов для ежедневной загрузки',
+    ],
+    _达到每天下载的文件大小限制的说明: [
+        `每天下载的文件大小限制。<br><br>这是下载器的一个安全功能，目的是为了避免在一天内下载过多的文件，导致账号被封禁。默认值是 10 GB，这是一个相对安全的限制。达到限制之后，需要等到第二天才能继续下载。<br>如果你想现在就继续下载，可以在下载器界面的下半部分找到“每天下载的文件大小限制”设置，并关闭它。`,
+        `每天下載的檔案大小限制。<br><br>這是下載器的一項安全功能，目的是避免在一天內下載過多檔案，導致帳號被封禁。預設值為 10 GB，這是一個相對安全的限制。達到限制後，需要等到第二天才能繼續下載。<br>如果你想現在繼續下載，可以在下載器介面的下半部分找到「每天下載的檔案大小限制」設定，並將其關閉。`,
+        `Daily download file size limit.<br><br>This is a safety feature of the downloader, intended to prevent your account from being banned due to downloading too many files in one day. The default value is 10 GB, which is a relatively safe limit. Once the limit is reached, you need to wait until the next day to continue downloading.<br>If you want to continue downloading now, find the "Daily download file size limit" setting in the lower half of the downloader interface and turn it off.`,
+        `1日のダウンロードファイルサイズ制限。<br><br>これは、1日に過剰なファイルをダウンロードしてアカウントが停止されるのを防ぐための、ダウンローダーの安全機能です。デフォルト値は 10 GB で、比較的安全な制限です。制限に達した後は、翌日まで待ってからダウンロードを続行する必要があります。<br>今すぐダウンロードを続けたい場合は、ダウンローダー画面の下部にある「1日のダウンロードファイルサイズ制限」設定を見つけて無効にしてください。`,
+        `일일 다운로드 파일 크기 제한.<br><br>하루에 너무 많은 파일을 다운로드하여 계정이 정지되는 것을 방지하기 위한 다운로더의 안전 기능입니다. 기본값은 비교적 안전한 제한인 10 GB입니다. 제한에 도달한 후에는 다음 날까지 기다려야 다운로드를 계속할 수 있습니다.<br>지금 다운로드를 계속하려면 다운로더 화면 하단에서 "일일 다운로드 파일 크기 제한" 설정을 찾아 해제하세요.`,
+        `Ограничение на размер файлов для ежедневной загрузки.<br><br>Это функция безопасности загрузчика, предназначенная для предотвращения блокировки аккаунта из-за загрузки слишком большого количества файлов за один день. Значение по умолчанию — 10 ГБ, это относительно безопасное ограничение. После достижения лимита нужно дождаться следующего дня, чтобы продолжить загрузку.<br>Если вы хотите продолжить загрузку сейчас, найдите настройку «Ограничение на размер файлов для ежедневной загрузки» в нижней части интерфейса загрузчика и отключите её.`,
     ],
     _每天下载的文件大小限制的说明: [
         `每当下载完一个文件之后，下载器都会检查今天下载的文件的总体积。<br>
@@ -8999,6 +9016,14 @@ Firefox 브라우저는 Firefox Add-ons에서 설치할 수 있습니다.<br><a 
         `投稿リストの取得を開始`,
         `게시물 목록 가져오기 시작`,
         `Начать получать список публикаций`,
+    ],
+    _没有找到投稿列表的提示: [
+        `没有找到投稿列表，可能是因为这个创作者没有任何投稿`,
+        `沒有找到投稿清單，可能是因為這位創作者沒有任何投稿`,
+        `No post list was found. This creator may not have any posts.`,
+        `投稿リストが見つかりませんでした。このクリエイターには投稿がない可能性があります。`,
+        `게시물 목록을 찾을 수 없습니다. 이 크리에이터에게는 게시물이 없을 수 있습니다.`,
+        `Список публикаций не найден. Возможно, у этого автора нет публикаций.`,
     ],
 };
 
