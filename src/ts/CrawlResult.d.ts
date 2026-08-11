@@ -120,12 +120,18 @@ interface BlocksDataEmbed {
   embedId: string
 }
 
+interface BlocksDataUrlEmbed {
+  type: 'url_embed'
+  urlEmbedId: string
+}
+
 // article 投稿里所有可能出现的段落信息
 type AllBlocks =
   | BlocksDataText
   | BlocksDataFile
   | BlocksDataImage
   | BlocksDataEmbed
+  | BlocksDataUrlEmbed
 
 interface EmbedData {
   id: string

@@ -20,6 +20,8 @@ import { downloadStates } from './DownloadStates'
 import { toast } from '../Toast'
 import { Config } from '../Config'
 import { getTotalDownload } from './GetTotalDownload'
+import { saveData } from '../SaveData'
+import { FileResult, ResultMeta } from '../StoreType'
 
 interface TaskList {
   [id: string]: {
@@ -443,13 +445,55 @@ class DownloadControl {
       let result = store.result[index]
 
       // 对于文本数据，此时创建其 URL
-      if ((result as any).text && (result as any).text.length > 0) {
-        const text = (result as any).text.join('\r\n')
-        const blob = new Blob([text], {
-          type: 'text/plain',
-        })
-        result.url = URL.createObjectURL(blob)
-        result.size = blob.size
+      // 空正文的 HTML 也需要生成文件，否则无法保存只有资源的投稿
+      if ('text' in result) {
+        // 是否以 HTML 格式下载文本。
+        // 这里以当前设置为准，而不是以抓取时保存的 ext 为准：
+        // 用户可能在抓取之后修改了文本格式设置（例如从 HTML 切换为纯文本），
+        // 如果仍按抓取时的 ext 下载，会得到不符合当前设置的 HTML 文件
+        const isHtml =
+          !!result.htmlData &&
+          settings.saveText &&
+          settings.textFormat === 'html'
+
+        // 有可保存的文本内容时才生成文件。
+        // HTML 模式即使正文为空（text 数组为空）也要生成文件，以便保存只有资源的投稿
+        if (isHtml || result.text.length > 0) {
+          if (isHtml) {
+            // HTML 需要在下载时生成，才能使用当前任务的本地资源路径
+            const resultMeta: ResultMeta = {
+              postId: result.postId,
+              type: result.type,
+              title: result.title,
+              date: result.date,
+              fee: result.fee,
+              user: result.user,
+              uid: result.uid,
+              createID: result.createID,
+              tags: result.tags,
+              files: store.result.filter(
+                (item) => item.postId === result.postId && !('text' in item),
+              ) as FileResult[],
+              textContent: result,
+            }
+            result.text = [
+              saveData.createHtmlDocument(result.htmlData!, resultMeta),
+            ]
+            result.ext = 'html'
+          } else {
+            // 纯文本下载。同时修正扩展名，避免文件名仍使用抓取时保存的 html
+            result.ext = 'txt'
+          }
+
+          const text = result.text.join('\r\n')
+          const blob = new Blob([text], {
+            type: isHtml
+              ? 'text/html;charset=utf-8'
+              : 'text/plain;charset=utf-8',
+          })
+          result.url = URL.createObjectURL(blob)
+          result.size = blob.size
+        }
       }
 
       // 对于需要使用缩略图来重试下载的情况，如果没有缩略图，则跳过下载此文件
@@ -478,6 +522,11 @@ class DownloadControl {
         index: index,
         progressBarIndex: progressBarIndex,
         taskBatch: this.taskBatch,
+        // 仅 HTML 文本需要覆盖，避免附件和图片被同名文件覆盖
+        conflictAction:
+          'text' in result && result.ext === 'html'
+            ? 'overwrite'
+            : undefined,
       }
 
       // 保存任务信息

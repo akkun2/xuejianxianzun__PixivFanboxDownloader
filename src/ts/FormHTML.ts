@@ -129,6 +129,14 @@ export const formHtml = `<form class="settingForm">
     <span class="settingNameStyle1" data-xztext="_保存投稿中的文字"></span>
     <input type="checkbox" name="saveText" class="need_beautify checkbox_switch">
     <span class="beautify_switch"></span>
+    <span class="subOptionWrap" data-show="saveText">
+    <input type="radio" name="textFormat" id="textFormat1" class="need_beautify radio" value="txt" checked>
+    <span class="beautify_radio" tabindex="0"></span>
+    <label for="textFormat1" data-xztext="_纯文本"></label>
+    <input type="radio" name="textFormat" id="textFormat2" class="need_beautify radio" value="html">
+    <span class="beautify_radio" tabindex="0"></span>
+    <label for="textFormat2" data-xztext="_HTML"></label>
+    </span>
     </p>
 
     <p class="option" data-no="23">

@@ -65,7 +65,7 @@ chrome.runtime.onMessage.addListener(async function (
       {
         url: msg.fileUrl,
         filename: msg.fileName,
-        conflictAction: 'uniquify',
+        conflictAction: msg.conflictAction || 'uniquify',
         saveAs: false,
       },
       (id) => {

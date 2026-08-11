@@ -1,3 +1,5 @@
+import { PostBody } from './CrawlResult'
+
 // 通用的结果数据
 // 不涉及文件和文本
 interface CommonResult {
@@ -30,12 +32,13 @@ interface FileResult {
 interface TextResult {
   name: string
   fileID: string
-  ext: 'txt'
+  ext: 'txt' | 'html'
   size: number | null
   index: 0
   text: string[]
   url: string
   retryUrl: string | null
+  htmlData?: PostBody
 }
 
 // 以投稿为单位，保存要下载的资源

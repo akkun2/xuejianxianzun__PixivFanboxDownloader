@@ -18,6 +18,7 @@ export interface SettingsForm extends HTMLFormElement {
   postDateEnd: HTMLInputElement
   saveLink: HTMLInputElement
   saveText: HTMLInputElement
+  textFormat: RadioNodeList
   userSetName: HTMLInputElement
   fileNameSelect: HTMLSelectElement
   autoStartDownload: HTMLInputElement

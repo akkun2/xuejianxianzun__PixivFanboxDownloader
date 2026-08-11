@@ -518,6 +518,15 @@ So the file name set by the downloader is lost, and the file name becomes the la
     '게시물의 <span class="key">텍스트</span> 저장',
     'Сохранить <span class="key">текст</span> в публикациях',
   ],
+  _纯文本: [
+    '纯文本',
+    '純文字',
+    'Plain text',
+    'プレーンテキスト',
+    '일반 텍스트',
+    'Обычный текст',
+  ],
+  _HTML: ['HTML', 'HTML', 'HTML', 'HTML', 'HTML', 'HTML'],
   _抓取文件数量: [
     '已获取 {} 个文件',
     '已取得 {} 個檔案',

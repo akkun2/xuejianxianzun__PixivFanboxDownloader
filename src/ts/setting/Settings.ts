@@ -75,6 +75,7 @@ interface XzSetting {
   postDateEnd: number
   saveLink: boolean
   saveText: boolean
+  textFormat: 'txt' | 'html'
   userSetName: string
   autoStartDownload: boolean
   downloadThread: number
@@ -149,6 +150,7 @@ class Settings {
     postDateEnd: 1893456000000,
     saveLink: true,
     saveText: false,
+    textFormat: 'txt',
     userSetName: 'fanbox/{user}/{date}-{title}/{index}',
     autoStartDownload: true,
     downloadThread: 2,
@@ -164,7 +166,7 @@ class Settings {
     boldKeywords: true,
     namingRuleList: [],
     showNotificationAfterDownloadComplete: false,
-    zeroPadding: false,
+    zeroPadding: true,
     zeroPaddingLength: 3,
     deduplication: false,
     showHowToUse: true,

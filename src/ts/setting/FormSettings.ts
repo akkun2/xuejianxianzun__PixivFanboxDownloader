@@ -84,6 +84,7 @@ class FormSettings {
       'bgPositionY',
       'userSetLang',
       'imageSize',
+      'textFormat',
       'theme',
     ],
     textarea: [],

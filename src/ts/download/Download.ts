@@ -102,6 +102,7 @@ class Download {
       fileName: fileName,
       id,
       taskBatch,
+      conflictAction: this.arg.conflictAction,
     }
 
     chrome.runtime.sendMessage(sendData)

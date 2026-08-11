@@ -6,6 +6,7 @@ export interface downloadArgument {
   index: number
   progressBarIndex: number
   taskBatch: number
+  conflictAction?: 'uniquify' | 'overwrite' | 'prompt'
 }
 
 // 前台向后台发送的任务信息
@@ -15,6 +16,7 @@ export interface SendToBackEndData {
   fileName: string
   id: string
   taskBatch: number
+  conflictAction?: 'uniquify' | 'overwrite' | 'prompt'
 }
 
 // 浏览器下载时每个任务的信息
