@@ -20,7 +20,7 @@ import { downloadStates } from './DownloadStates'
 import { toast } from '../Toast'
 import { Config } from '../Config'
 import { getTotalDownload } from './GetTotalDownload'
-import { saveData } from '../SaveData'
+import { createHtmlDocument } from './CreateHtmlDocument'
 import { FileResult, ResultMeta } from '../StoreType'
 
 interface TaskList {
@@ -477,7 +477,7 @@ class DownloadControl {
               textContent: result,
             }
             result.text = [
-              saveData.createHtmlDocument(result.htmlData!, resultMeta),
+              createHtmlDocument.create(result.htmlData!, resultMeta),
             ]
             result.ext = 'html'
           } else {
@@ -524,9 +524,7 @@ class DownloadControl {
         taskBatch: this.taskBatch,
         // 仅 HTML 文本需要覆盖，避免附件和图片被同名文件覆盖
         conflictAction:
-          'text' in result && result.ext === 'html'
-            ? 'overwrite'
-            : undefined,
+          'text' in result && result.ext === 'html' ? 'overwrite' : undefined,
       }
 
       // 保存任务信息

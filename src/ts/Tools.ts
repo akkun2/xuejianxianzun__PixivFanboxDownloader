@@ -1,4 +1,9 @@
+import { ServiceProvider, VideoProvider } from './CrawlResult'
 import { lang } from './Lang'
+
+type Dict = {
+  [key in ServiceProvider]: string
+}
 
 class Tools {
   static getUserId() {
@@ -86,6 +91,28 @@ class Tools {
     }
 
     return result
+  }
+
+  // 嵌入的文件只支持指定的网站，每个网站有固定的前缀
+  static readonly providerDict: Dict = {
+    youtube: 'https://www.youtube.com/watch?v=',
+    fanbox: 'https://www.fanbox.cc/',
+    gist: 'https://gist.github.com/',
+    soundcloud: 'https://soundcloud.com/',
+    vimeo: 'https://player.vimeo.com/video/',
+    twitter: 'https://twitter.com/i/web/status/',
+    google_forms: 'https://docs.google.com/forms/d/e/',
+  }
+
+  static getEmbedUrl(
+    serviceProvider: ServiceProvider | VideoProvider,
+    contentId: string,
+  ) {
+    let url = this.providerDict[serviceProvider] + contentId
+    if (serviceProvider === 'google_forms') {
+      url += '/viewform'
+    }
+    return url
   }
 }
 
