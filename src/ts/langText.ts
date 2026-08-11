@@ -518,6 +518,14 @@ So the file name set by the downloader is lost, and the file name becomes the la
     '게시물의 <span class="key">텍스트</span> 저장',
     'Сохранить <span class="key">текст</span> в публикациях',
   ],
+  _保存投稿中的评论: [
+    '保存投稿中的<span class="key">评论</span>',
+    '儲存投稿中的<span class="key">評論</span>',
+    'Save <span class="key">comments</span> in the posts',
+    '投稿の<span class="key">コメント</span>を保存',
+    '게시물의 <span class="key">댓글</span> 저장',
+    'Сохранить <span class="key">комментарии</span> в публикациях',
+  ],
   _纯文本: [
     '纯文本',
     '純文字',
@@ -527,6 +535,7 @@ So the file name set by the downloader is lost, and the file name becomes the la
     'Обычный текст',
   ],
   _HTML: ['HTML', 'HTML', 'HTML', 'HTML', 'HTML', 'HTML'],
+  _评论: ['评论', '評論', 'Comments', 'コメント', '댓글', 'Комментарии'],
   _抓取文件数量: [
     '已获取 {} 个文件',
     '已取得 {} 個檔案',

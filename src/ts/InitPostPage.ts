@@ -50,6 +50,7 @@ class InitPostPage extends InitPageBase {
         Utils.getURLPathField(window.location.pathname, 'posts'),
       )
       crawlInterval.addTime()
+      await this.fetchAllComments(data.body.post || data.body)
       this.afterFetchPost(data)
     } catch (error) {
       console.log(error)

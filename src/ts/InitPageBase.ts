@@ -6,13 +6,14 @@ import { store } from './Store'
 import { log } from './Log'
 import { EVT } from './EVT'
 import { saveData } from './SaveData'
-import { PostList, Post, SupportPostList, TagPostList } from './CrawlResult.d'
+import { PostList, Post, SupportPostList, TagPostList, PostBody } from './CrawlResult.d'
 import { API } from './API'
 import { states } from './States'
 import { msgBox } from './MsgBox'
 import { toast } from './Toast'
 import { Utils } from './utils/Utils'
 import { crawlInterval } from './CrawlInterval'
+import { settings } from './setting/Settings'
 
 abstract class InitPageBase {
   protected init() {
@@ -280,6 +281,8 @@ abstract class InitPageBase {
     try {
       const data = await API.getPost(postId)
       crawlInterval.addTime()
+      // 把评论合并进投稿数据里，从 afterFetchPost 的角度看，相当于 post.info 自带评论
+      await this.fetchAllComments(data.body.post || data.body)
       this.afterFetchPost(data)
     } catch (error) {
       console.log(error)
@@ -330,6 +333,79 @@ abstract class InitPageBase {
 
     EVT.fire('crawlFinish')
     // console.log(store.result)
+  }
+
+  // 获取投稿的全部评论，把结果合并到 post 的 commentList 里
+  // FANBOX 的 post.info 不再返回评论，需要调用评论接口 post.getComments，使用 offset 分页
+  protected async fetchAllComments(post: PostBody) {
+    // 未开启保存评论时不做任何事
+    if (!settings.saveComment) {
+      return
+    }
+    // commentCount 为 0 的投稿没有评论，不需要请求
+    if (post.commentCount === 0) {
+      return
+    }
+
+    const limit = 50
+    let items: any[] = []
+    let nextUrl: string | null = null
+
+    try {
+      await crawlInterval.wait()
+      const data = await API.getPostComments(post.id, 0, limit)
+      crawlInterval.addTime()
+      items = data.body.commentList.items
+      nextUrl = data.body.commentList.nextUrl
+    } catch (error) {
+      console.log(error)
+      return
+    }
+
+    // 翻页获取剩余评论：优先跟随 nextUrl，否则按 offset 递增
+    // 当一页返回不足 limit 条时，说明没有更多评论了
+    // 最多获取 20 页（1000 条评论），防止异常情况导致无限请求
+    let page = 1
+    let hasMore = items.length >= limit
+    while (page < 20 && (nextUrl || hasMore)) {
+      try {
+        page++
+        await crawlInterval.wait()
+        let list: { items: any[]; nextUrl: string | null }
+        if (nextUrl) {
+          const data: any = await API.request(nextUrl)
+          list = data.body.commentList
+        } else {
+          const data = await API.getPostComments(
+            post.id,
+            items.length,
+            limit,
+          )
+          list = data.body.commentList
+        }
+        crawlInterval.addTime()
+        items = items.concat(list.items)
+        nextUrl = list.nextUrl
+        hasMore = list.items.length >= limit
+      } catch (error) {
+        // 评论分页请求失败时停止获取更多评论，避免无限重试
+        console.log(error)
+        break
+      }
+    }
+
+    // 去重，防止分页返回重复数据
+    const seen = new Set<string>()
+    items = items.filter((comment: any) => {
+      if (!comment || !comment.id || seen.has(comment.id)) {
+        return false
+      }
+      seen.add(comment.id)
+      return true
+    })
+
+    // 把结果写入 post.commentList，供保存流程使用
+    post.commentList = { items, nextUrl: null }
   }
 
   // 抓取结果为 0 时输出提示

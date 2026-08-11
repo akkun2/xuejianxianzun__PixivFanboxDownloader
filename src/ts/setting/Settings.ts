@@ -76,6 +76,8 @@ interface XzSetting {
   saveLink: boolean
   saveText: boolean
   textFormat: 'txt' | 'html'
+  /**是否保存投稿中的评论 */
+  saveComment: boolean
   userSetName: string
   autoStartDownload: boolean
   downloadThread: number
@@ -151,6 +153,7 @@ class Settings {
     saveLink: true,
     saveText: false,
     textFormat: 'txt',
+    saveComment: false,
     userSetName: 'fanbox/{user}/{date}-{title}/{index}',
     autoStartDownload: true,
     downloadThread: 2,

@@ -13,15 +13,12 @@ import { log } from './Log'
 import { lang } from './Lang'
 import { msgBox } from './MsgBox'
 import { Tools } from './Tools'
+import { renderCommentsText } from './RenderCommentsText'
 
 type EmbedDataArr = [ServiceProvider | VideoProvider, string][]
 
 class SaveData {
   private readonly extractTextReg = new RegExp(/<[^<>]+>/g)
-
-  protected readonly matchImgSrc = new RegExp(
-    /(?<=src=")https.*?(jpeg|jpg|png|gif|bmp)/g,
-  )
 
   public receive(data: PostBody) {
     // console.log(data)
@@ -80,7 +77,7 @@ class SaveData {
       if (cover) {
         const { name, ext } = this.getUrlNameAndExt(cover)
         const r: FileResult = {
-          fileID: this.createFileId(),
+          fileID: Tools.createFileId(),
           name,
           ext,
           size: null,
@@ -103,6 +100,8 @@ class SaveData {
           lang.transl('_价格限制') +
           ` ${fee}`,
       )
+      // 评论是投稿级别的数据，不依赖正文，也可以保存
+      renderCommentsText.render(result, data)
       if (result.files.length > 0) {
         store.addResult(result)
       }
@@ -122,7 +121,7 @@ class SaveData {
       if (text) {
         const links = this.getTextLinks(text)
         result.textContent.text = result.textContent.text.concat(links)
-        result.textContent.fileID = this.createFileId()
+        result.textContent.fileID = Tools.createFileId()
 
         // 保存文章正文里的文字
         if (settings.saveText) {
@@ -168,7 +167,7 @@ class SaveData {
       for (const link of linkTexts) {
         const links = this.getTextLinks(link)
         result.textContent.text = result.textContent.text.concat(links)
-        result.textContent.fileID = this.createFileId()
+        result.textContent.fileID = Tools.createFileId()
       }
 
       // 如果有链接，则添加一个空字符串，使其占据一行
@@ -214,7 +213,7 @@ class SaveData {
       }
       const embedLinks = this.getEmbedLinks(embedDataArr, data.id)
       result.textContent.text = result.textContent.text.concat(embedLinks)
-      result.textContent.fileID = this.createFileId()
+      result.textContent.fileID = Tools.createFileId()
 
       // 保存嵌入的 URL，只能保存到文本
       if (settings.saveLink) {
@@ -249,7 +248,7 @@ class SaveData {
           result.textContent.text = result.textContent.text.concat(
             urlArr.join('\n\n'),
           )
-          result.textContent.fileID = this.createFileId()
+          result.textContent.fileID = Tools.createFileId()
         }
       }
     }
@@ -331,13 +330,17 @@ class SaveData {
       ]
       const embedLinks = this.getEmbedLinks(embedDataArr, data.id)
       result.textContent.text = result.textContent.text.concat(embedLinks)
-      result.textContent.fileID = this.createFileId()
+      result.textContent.fileID = Tools.createFileId()
     }
+
+    // 保存投稿中的评论
+    // 评论不依赖投稿正文，正文之外的信息（链接等）可能包含在评论里
+    renderCommentsText.render(result, data)
 
     if (settings.saveText && settings.textFormat === 'html') {
       result.textContent.ext = 'html'
       result.textContent.htmlData = data
-      result.textContent.fileID ||= this.createFileId()
+      result.textContent.fileID ||= Tools.createFileId()
     }
 
     // 检查文本里是否含有网址
@@ -442,15 +445,6 @@ class SaveData {
     }
 
     return links
-  }
-
-  // 下载器自己生成的 txt 文件没有 id，所以这里需要自己给它生成一个 id
-  // 使用时间戳并不保险，因为有时候代码执行太快，会生成重复的时间戳。所以后面加上随机字符
-  private createFileId() {
-    return (
-      new Date().getTime().toString() +
-      Math.random().toString(16).replace('.', '')
-    )
   }
 
   // 传入文件 url，提取文件名和扩展名

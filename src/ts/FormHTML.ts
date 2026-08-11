@@ -1,6 +1,6 @@
 import { Config } from './Config'
 
-// 已使用的最大编号为 60
+// 已使用的最大编号为 61
 export const formHtml = `<form class="settingForm">
     <p class="option" data-no="2">
     <span class="settingNameStyle1" data-xztext="_文件类型"></span>
@@ -119,12 +119,6 @@ export const formHtml = `<form class="settingForm">
     <span class="beautify_switch"></span>
     </p>
 
-    <p class="option" data-no="19">
-    <span class="settingNameStyle1" data-xztext="_保存投稿中的外部链接"></span>
-    <input type="checkbox" name="saveLink" class="need_beautify checkbox_switch" checked>
-    <span class="beautify_switch"></span>
-    </p>
-
     <p class="option" data-no="20">
     <span class="settingNameStyle1" data-xztext="_保存投稿中的文字"></span>
     <input type="checkbox" name="saveText" class="need_beautify checkbox_switch">
@@ -137,6 +131,18 @@ export const formHtml = `<form class="settingForm">
     <span class="beautify_radio" tabindex="0"></span>
     <label for="textFormat2" data-xztext="_HTML"></label>
     </span>
+    </p>
+
+    <p class="option" data-no="19">
+    <span class="settingNameStyle1" data-xztext="_保存投稿中的外部链接"></span>
+    <input type="checkbox" name="saveLink" class="need_beautify checkbox_switch" checked>
+    <span class="beautify_switch"></span>
+    </p>
+
+    <p class="option" data-no="61">
+    <span class="settingNameStyle1" data-xztext="_保存投稿中的评论"></span>
+    <input type="checkbox" name="saveComment" class="need_beautify checkbox_switch">
+    <span class="beautify_switch"></span>
     </p>
 
     <p class="option" data-no="23">
