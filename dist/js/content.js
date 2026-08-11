@@ -13,17 +13,6 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */   API: () => (/* binding */ API)
 /* harmony export */ });
 class API {
-    constructor() {
-        this.error = {
-            message: 'Fetch failed: Failed to fetch',
-            error: {
-                message: 'Failed to fetch',
-                stack: `TypeError: Failed to fetch\n
-              at chrome-extension://mfkglccbgcbnbkdgekepcgnhobeopoji/js/content.js:112:13\n
-              ...更多栈信息`,
-            },
-        };
-    }
     // 组装 url 的查询参数。当该参数有值时，将其添加到 url 里
     static assembleURL(baseURL, args) {
         const temp = new URL(baseURL);
@@ -65,6 +54,15 @@ class API {
             });
         });
     }
+    error = {
+        message: 'Fetch failed: Failed to fetch',
+        error: {
+            message: 'Failed to fetch',
+            stack: `TypeError: Failed to fetch\n
+              at chrome-extension://mfkglccbgcbnbkdgekepcgnhobeopoji/js/content.js:112:13\n
+              ...更多栈信息`,
+        },
+    };
     static getCreatorId(url) {
         const split = url.split('/');
         // 首先获取以 @ 开头的用户名
@@ -157,26 +155,19 @@ __webpack_require__.r(__webpack_exports__);
 
 class BG {
     constructor() {
-        this.list = [];
-        this.bgModeflagClassName = 'xzBG';
-        this.bgLayerClassName = 'xzBGLayer';
-        this.bgUrl = '';
-        this.DBName = 'PFDBG';
-        this.DBVer = 1;
-        this.storeName = 'bg';
-        this.keyName = 'bg';
-        // 在数据库升级事件里创建表
-        this.onUpdate = (db) => {
-            if (!db.objectStoreNames.contains(this.storeName)) {
-                db.createObjectStore(this.storeName, {
-                    keyPath: 'key',
-                });
-            }
-        };
         this.IDB = new _utils_IndexedDB__WEBPACK_IMPORTED_MODULE_2__.IndexedDB();
         this.initDB();
         this.bindEvents();
     }
+    list = [];
+    bgModeflagClassName = 'xzBG';
+    bgLayerClassName = 'xzBGLayer';
+    bgUrl = '';
+    IDB;
+    DBName = 'PFDBG';
+    DBVer = 1;
+    storeName = 'bg';
+    keyName = 'bg';
     async initDB() {
         // 如果用户没有启用“背景图片”，就不会创建数据库
         // 因为大部分用户都不会启用此功能，所以没必要创建数据库
@@ -185,6 +176,14 @@ class BG {
             this.restore();
         }
     }
+    // 在数据库升级事件里创建表
+    onUpdate = (db) => {
+        if (!db.objectStoreNames.contains(this.storeName)) {
+            db.createObjectStore(this.storeName, {
+                keyPath: 'key',
+            });
+        }
+    };
     createBGLayer(wrap) {
         const div = document.createElement('div');
         div.classList.add(this.bgLayerClassName);
@@ -331,11 +330,12 @@ __webpack_require__.r(__webpack_exports__);
 
 class BoldKeywords {
     constructor(wrap) {
-        this.className = 'showBlobKeywords';
         this.wrap = wrap;
         this.bindEvent();
         this.setClassName();
     }
+    wrap;
+    className = 'showBlobKeywords';
     bindEvent() {
         window.addEventListener(_EVT__WEBPACK_IMPORTED_MODULE_0__.EVT.list.settingChange, (ev) => {
             const data = ev.detail.data;
@@ -382,8 +382,6 @@ __webpack_require__.r(__webpack_exports__);
 // 中间面板
 class CenterPanel {
     constructor() {
-        this.centerPanel = document.createElement('div'); // 中间面板
-        this.allLangFlag = [];
         this.addCenterPanel();
         _Theme__WEBPACK_IMPORTED_MODULE_8__.theme.register(this.centerPanel);
         _Lang__WEBPACK_IMPORTED_MODULE_0__.lang.register(this.centerPanel);
@@ -393,6 +391,7 @@ class CenterPanel {
         this.setLangFlag();
         this.bindEvents();
     }
+    centerPanel = document.createElement('div'); // 中间面板
     // 添加中间面板
     addCenterPanel() {
         const centerPanelHTML = `
@@ -422,12 +421,12 @@ class CenterPanel {
       <div class="centerWrap_con beautify_scrollbar">
       <slot data-name="form"></slot>
 
-      <div class="help_bar gray1"> 
-      <button class="textButton gray1" id="showDownTip" type="button" data-xztext="_常见问题"></button>
-      <button class="textButton gray1" id="showRecentUpdates" type="button" data-xztext="_最近更新"></button>
-      <a class="gray1" href="https://discord.gg/u4wVMy7xJM" target="_blank">Discord</a>
-      <button class="textButton gray1" id="xzPixivDownloader" type="button" data-xztext="_pixivDownloader"></button>
-      <button class="textButton gray1" id="showPatronTip" type="button" data-xztext="_赞助我"></button>
+      <div class="help_bar gray"> 
+      <button class="textButton gray" id="showDownTip" type="button" data-xztext="_常见问题"></button>
+      <button class="textButton gray" id="showRecentUpdates" type="button" data-xztext="_最近更新"></button>
+      <a class="gray" href="https://discord.gg/u4wVMy7xJM" target="_blank">Discord</a>
+      <button class="textButton gray" id="xzPixivDownloader" type="button" data-xztext="_pixivDownloader"></button>
+      <button class="textButton gray" id="showPatronTip" type="button" data-xztext="_赞助我"></button>
       </div>
       
       </div>
@@ -437,6 +436,7 @@ class CenterPanel {
         document.body.insertAdjacentHTML('beforebegin', centerPanelHTML);
         this.centerPanel = document.querySelector('.centerWrap');
     }
+    allLangFlag = [];
     setLangFlag() {
         this.allLangFlag.forEach((flag) => {
             this.centerPanel.classList.remove(flag);
@@ -565,40 +565,40 @@ __webpack_require__.r(__webpack_exports__);
 // 相关文档： notes/一些国产套壳浏览器使用本程序的情况.md
 class CheckUnsupportBrowser {
     constructor() {
-        this.rules = {
-            // "Mozilla/5.0 (Windows NT 10.0; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/87.0.4280.66 Safari/537.36 SE 2.X MetaSr 1.0"
-            Sougou: function () {
-                return navigator.userAgent.includes(' SE ');
-            },
-            // "Mozilla/5.0 (Windows NT 10.0; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/70.0.3538.25 Safari/537.36 Core/1.70.3872.400 QQBrowser/10.8.4455.400"
-            QQ: function () {
-                return navigator.userAgent.includes('QQBrowser');
-            },
-            // "Mozilla/5.0 (Windows NT 10.0; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/69.0.3947.100 Safari/537.36 2345Explorer/10.21.0.21486"
-            '2345': function () {
-                return navigator.userAgent.includes('2345Explorer');
-            },
-            All: function () {
-                // 如果这个浏览器的 Chrome 内核的版本号较低，也会显示提示
-                // 为什么设置为 88：
-                // 1. 下载器使用的 Manifest V2 需要的内核版本最低为 79
-                // 2. Cent 浏览器的内核版本是 86，但它即使使用 V2，仍然会在转换 GIF 时出现问题，所以需要提高版本号
-                // 3. 未来升级到 Manifest V3 需要的内核版本最低为 88
-                const minChromeVer = 88;
-                const test = navigator.userAgent.match(/Chrome\/(\d*)/);
-                if (test && test[1]) {
-                    const ver = Number.parseInt(test[1]);
-                    if (ver < minChromeVer) {
-                        return true;
-                    }
-                }
-                return false;
-            },
-        };
         window.addEventListener(_EVT__WEBPACK_IMPORTED_MODULE_0__.EVT.list.settingInitialized, () => {
             this.check();
         });
     }
+    rules = {
+        // "Mozilla/5.0 (Windows NT 10.0; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/87.0.4280.66 Safari/537.36 SE 2.X MetaSr 1.0"
+        Sougou: function () {
+            return navigator.userAgent.includes(' SE ');
+        },
+        // "Mozilla/5.0 (Windows NT 10.0; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/70.0.3538.25 Safari/537.36 Core/1.70.3872.400 QQBrowser/10.8.4455.400"
+        QQ: function () {
+            return navigator.userAgent.includes('QQBrowser');
+        },
+        // "Mozilla/5.0 (Windows NT 10.0; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/69.0.3947.100 Safari/537.36 2345Explorer/10.21.0.21486"
+        '2345': function () {
+            return navigator.userAgent.includes('2345Explorer');
+        },
+        All: function () {
+            // 如果这个浏览器的 Chrome 内核的版本号较低，也会显示提示
+            // 为什么设置为 88：
+            // 1. 下载器使用的 Manifest V2 需要的内核版本最低为 79
+            // 2. Cent 浏览器的内核版本是 86，但它即使使用 V2，仍然会在转换 GIF 时出现问题，所以需要提高版本号
+            // 3. 未来升级到 Manifest V3 需要的内核版本最低为 88
+            const minChromeVer = 88;
+            const test = navigator.userAgent.match(/Chrome\/(\d*)/);
+            if (test && test[1]) {
+                const ver = Number.parseInt(test[1]);
+                if (ver < minChromeVer) {
+                    return true;
+                }
+            }
+            return false;
+        },
+    };
     check() {
         for (const func of Object.values(this.rules)) {
             if (func()) {
@@ -670,32 +670,32 @@ __webpack_require__.r(__webpack_exports__);
 // 储存一些配置
 // 用户不可以修改这里的配置
 class Config {
+    /**使用输出面板显示内容时，如果文件数量大于这个值，就不再显示内容，而是保存到 txt 文件 */
+    static outputMax = 5000;
+    /**同时下载的文件数量的最大值 */
+    static downloadThreadMax = 3;
+    /**下载某个文件出错时，最大重试次数 */
+    static retryMax = 10;
+    /**程序名 */
+    static appName = 'Pixiv Fanbox Downloader';
+    /**下载器设置在 localStorage 里储存时的 name */
+    static settingStoreName = 'fanboxSetting';
+    /**文件类型。fanbox 允许直接上传在投稿里的文件类型只有这些。现在没有 bmp 格式了，不过以前文章里上传的文件还会保留，所以这里也不要删除 */
+    static fileType = {
+        image: ['jpg', 'jpeg', 'png', 'gif', 'bmp'],
+        music: ['wav', 'mp3', 'flac'],
+        video: ['mp4', 'mov', 'avi'],
+        compressed: ['zip'],
+        ps: ['psd', 'clip'],
+        other: ['txt', 'pdf'],
+    };
+    /**默认的命名规则 */
+    static defaultNameRule = '{user}/{date}-{title}/{index}';
+    static defaultNameRuleForNonImages = '{user}/{date}-{title}/{name}';
+    /**浏览器是否处于移动端模式 */
+    static mobile = navigator.userAgent.includes('Mobile');
+    static whatIsNewFlagDefault = 'xuejian&saber';
 }
-/**使用输出面板显示内容时，如果文件数量大于这个值，就不再显示内容，而是保存到 txt 文件 */
-Config.outputMax = 5000;
-/**同时下载的文件数量的最大值 */
-Config.downloadThreadMax = 3;
-/**下载某个文件出错时，最大重试次数 */
-Config.retryMax = 10;
-/**程序名 */
-Config.appName = 'Pixiv Fanbox Downloader';
-/**下载器设置在 localStorage 里储存时的 name */
-Config.settingStoreName = 'fanboxSetting';
-/**文件类型。fanbox 允许直接上传在投稿里的文件类型只有这些。现在没有 bmp 格式了，不过以前文章里上传的文件还会保留，所以这里也不要删除 */
-Config.fileType = {
-    image: ['jpg', 'jpeg', 'png', 'gif', 'bmp'],
-    music: ['wav', 'mp3', 'flac'],
-    video: ['mp4', 'mov', 'avi'],
-    compressed: ['zip'],
-    ps: ['psd', 'clip'],
-    other: ['txt', 'pdf'],
-};
-/**默认的命名规则 */
-Config.defaultNameRule = '{user}/{date}-{title}/{index}';
-Config.defaultNameRuleForNonImages = '{user}/{date}-{title}/{name}';
-/**浏览器是否处于移动端模式 */
-Config.mobile = navigator.userAgent.includes('Mobile');
-Config.whatIsNewFlagDefault = 'xuejian&saber';
 
 
 
@@ -721,8 +721,6 @@ __webpack_require__.r(__webpack_exports__);
 
 class CrawlInterval {
     constructor() {
-        /**指示下一次抓取在什么时候进行 */
-        this.nextCrawlTime = 0;
         this.bindEvents();
     }
     bindEvents() {
@@ -736,6 +734,8 @@ class CrawlInterval {
             }
         });
     }
+    /**指示下一次抓取在什么时候进行 */
+    nextCrawlTime = 0;
     async wait() {
         if (this.nextCrawlTime > 0) {
             const now = Date.now();
@@ -788,67 +788,7 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */ });
 // 管理自定义事件
 class EVENT {
-    constructor() {
-        this.bindOnceFlagList = [];
-        this.list = {
-            crawlStart: 'crawlStart',
-            crawlFinish: 'crawlFinish',
-            crawlEmpty: 'crawlEmpty',
-            crawlError: 'crawlError',
-            addResult: 'addResult',
-            downloadStart: 'downloadStart',
-            downloadPause: 'downloadPause',
-            downloadStop: 'downloadStop',
-            download: 'download',
-            downloadSuccess: 'downloadSuccess',
-            downloadError: 'downloadError',
-            downloadComplete: 'downloadComplete',
-            pageSwitch: 'pageSwitch',
-            pageTypeChange: 'pageTypeChange',
-            resetOption: 'resetOption',
-            convertChange: 'convertChange',
-            previewFileName: 'previewFileName',
-            output: 'output',
-            hideCenterPanel: 'hideCenterPanel',
-            showCenterPanel: 'showCenterPanel',
-            clearMultiple: 'clearMultiple',
-            clearUgoira: 'clearUgoira',
-            deleteWork: 'deleteWork',
-            worksUpdate: 'worksUpdate',
-            settingChange: 'settingChange',
-            clickRightIcon: 'clickRightIcon',
-            convertError: 'convertError',
-            skipDownload: 'skipDownload',
-            resetSettings: 'resetSettings',
-            exportSettings: 'exportSettings',
-            importSettings: 'importSettings',
-            settingInitialized: 'settingInitialized',
-            resetSettingsEnd: 'resetSettingsEnd',
-            pageSwitchedTypeChange: 'pageSwitchedTypeChange',
-            pageSwitchedTypeNotChange: 'pageSwitchedTypeNotChange',
-            openCenterPanel: 'openCenterPanel',
-            closeCenterPanel: 'closeCenterPanel',
-            centerPanelOpened: 'centerPanelOpened',
-            centerPanelClosed: 'centerPanelClosed',
-            showMsg: 'showMsg',
-            langChange: 'langChange',
-            selectBG: 'selectBG',
-            clearBG: 'clearBG',
-            wrongSetting: 'wrongSetting',
-            clearLog: 'clearLog',
-            quickCrawl: 'quickCrawl',
-            importDownloadRecord: 'importDownloadRecord',
-            exportDownloadRecord: 'exportDownloadRecord',
-            clearDownloadRecord: 'clearDownloadRecord',
-            resume: 'resume',
-            clearSavedCrawl: 'clearSavedCrawl',
-            totalDownloadHistory: 'totalDownloadHistory',
-            /**当获取到页面的主题颜色时触发 */
-            getPageTheme: 'getPageTheme',
-            /** 显示最近更新 */
-            showRecentUpdates: 'showRecentUpdates',
-        };
-    }
+    bindOnceFlagList = [];
     // 只绑定某个事件一次，用于防止事件重复绑定
     // 通过 flag 确认是否是同一个事件
     // 可以执行多次，不会自动解绑
@@ -861,6 +801,64 @@ class EVENT {
             });
         }
     }
+    list = {
+        crawlStart: 'crawlStart',
+        crawlFinish: 'crawlFinish',
+        crawlEmpty: 'crawlEmpty',
+        crawlError: 'crawlError',
+        addResult: 'addResult',
+        downloadStart: 'downloadStart',
+        downloadPause: 'downloadPause',
+        downloadStop: 'downloadStop',
+        download: 'download',
+        downloadSuccess: 'downloadSuccess',
+        downloadError: 'downloadError',
+        downloadComplete: 'downloadComplete',
+        pageSwitch: 'pageSwitch',
+        pageTypeChange: 'pageTypeChange',
+        resetOption: 'resetOption',
+        convertChange: 'convertChange',
+        previewFileName: 'previewFileName',
+        output: 'output',
+        hideCenterPanel: 'hideCenterPanel',
+        showCenterPanel: 'showCenterPanel',
+        clearMultiple: 'clearMultiple',
+        clearUgoira: 'clearUgoira',
+        deleteWork: 'deleteWork',
+        worksUpdate: 'worksUpdate',
+        settingChange: 'settingChange',
+        clickRightIcon: 'clickRightIcon',
+        convertError: 'convertError',
+        skipDownload: 'skipDownload',
+        resetSettings: 'resetSettings',
+        exportSettings: 'exportSettings',
+        importSettings: 'importSettings',
+        settingInitialized: 'settingInitialized',
+        resetSettingsEnd: 'resetSettingsEnd',
+        pageSwitchedTypeChange: 'pageSwitchedTypeChange',
+        pageSwitchedTypeNotChange: 'pageSwitchedTypeNotChange',
+        openCenterPanel: 'openCenterPanel',
+        closeCenterPanel: 'closeCenterPanel',
+        centerPanelOpened: 'centerPanelOpened',
+        centerPanelClosed: 'centerPanelClosed',
+        showMsg: 'showMsg',
+        langChange: 'langChange',
+        selectBG: 'selectBG',
+        clearBG: 'clearBG',
+        wrongSetting: 'wrongSetting',
+        clearLog: 'clearLog',
+        quickCrawl: 'quickCrawl',
+        importDownloadRecord: 'importDownloadRecord',
+        exportDownloadRecord: 'exportDownloadRecord',
+        clearDownloadRecord: 'clearDownloadRecord',
+        resume: 'resume',
+        clearSavedCrawl: 'clearSavedCrawl',
+        totalDownloadHistory: 'totalDownloadHistory',
+        /**当获取到页面的主题颜色时触发 */
+        getPageTheme: 'getPageTheme',
+        /** 显示最近更新 */
+        showRecentUpdates: 'showRecentUpdates',
+    };
     fire(type, data = '') {
         const event = new CustomEvent(type, {
             detail: { data: data },
@@ -888,8 +886,10 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var _Store__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./Store */ "./src/ts/Store.ts");
 /* harmony import */ var _Lang__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./Lang */ "./src/ts/Lang.ts");
 /* harmony import */ var _utils_DateFormat__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ./utils/DateFormat */ "./src/ts/utils/DateFormat.ts");
-/* harmony import */ var _setting_Settings__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! ./setting/Settings */ "./src/ts/setting/Settings.ts");
-/* harmony import */ var _Config__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! ./Config */ "./src/ts/Config.ts");
+/* harmony import */ var _utils_Utils__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! ./utils/Utils */ "./src/ts/utils/Utils.ts");
+/* harmony import */ var _setting_Settings__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! ./setting/Settings */ "./src/ts/setting/Settings.ts");
+/* harmony import */ var _Config__WEBPACK_IMPORTED_MODULE_6__ = __webpack_require__(/*! ./Config */ "./src/ts/Config.ts");
+
 
 
 
@@ -898,31 +898,15 @@ __webpack_require__.r(__webpack_exports__);
 
 class FileName {
     constructor() {
-        // 用正则过滤不安全的字符，（Chrome 和 Windows 不允许做文件名的字符）
-        // 不安全的字符，这里多数是控制字符，需要替换掉
-        this.unsafeStr = new RegExp(/[\u0001-\u001f\u007f-\u009f\u00ad\u0600-\u0605\u061c\u06dd\u070f\u08e2\u180e\u200b-\u200f\u202a-\u202e\u2060-\u2064\u2066-\u206f\ufdd0-\ufdef\ufeff\ufff9-\ufffb\ufffe\uffff]/g);
-        // 一些需要替换成全角字符的符号，左边是正则表达式的字符
-        this.fullWidthDict = [
-            ['\\\\', '＼'],
-            ['/', '／'],
-            [':', '：'],
-            ['\\?', '？'],
-            ['"', '＂'],
-            ['<', '＜'],
-            ['>', '＞'],
-            ['\\*', '＊'],
-            ['\\|', '｜'],
-            ['~', '～'],
-        ];
         window.addEventListener(_EVT__WEBPACK_IMPORTED_MODULE_0__.EVT.list.previewFileName, () => {
             this.previewFileName();
         });
     }
     // 把一些特殊字符替换成全角字符
     replaceUnsafeStr(str) {
-        str = str.replace(this.unsafeStr, '');
-        for (let index = 0; index < this.fullWidthDict.length; index++) {
-            const rule = this.fullWidthDict[index];
+        str = str.replace(_utils_Utils__WEBPACK_IMPORTED_MODULE_4__.Utils.unsafeStr, '');
+        for (let index = 0; index < _utils_Utils__WEBPACK_IMPORTED_MODULE_4__.Utils.fullWidthDict.length; index++) {
+            const rule = _utils_Utils__WEBPACK_IMPORTED_MODULE_4__.Utils.fullWidthDict[index];
             const reg = new RegExp(rule[0], 'g');
             str = str.replace(reg, rule[1]);
         }
@@ -932,16 +916,16 @@ class FileName {
     createIndex(data) {
         let index = data.index.toString();
         // 处理在前面填充 0 的情况
-        return _setting_Settings__WEBPACK_IMPORTED_MODULE_4__.settings.zeroPadding
-            ? index.padStart(_setting_Settings__WEBPACK_IMPORTED_MODULE_4__.settings.zeroPaddingLength, '0')
+        return _setting_Settings__WEBPACK_IMPORTED_MODULE_5__.settings.zeroPadding
+            ? index.padStart(_setting_Settings__WEBPACK_IMPORTED_MODULE_5__.settings.zeroPaddingLength, '0')
             : index;
     }
     getNameRule(data) {
-        if (_Config__WEBPACK_IMPORTED_MODULE_5__.Config.fileType.image.includes(data.ext.toLowerCase())) {
-            return _setting_Settings__WEBPACK_IMPORTED_MODULE_4__.settings.userSetName || _Config__WEBPACK_IMPORTED_MODULE_5__.Config.defaultNameRule;
+        if (_Config__WEBPACK_IMPORTED_MODULE_6__.Config.fileType.image.includes(data.ext.toLowerCase())) {
+            return _setting_Settings__WEBPACK_IMPORTED_MODULE_5__.settings.userSetName || _Config__WEBPACK_IMPORTED_MODULE_6__.Config.defaultNameRule;
         }
         else {
-            return _setting_Settings__WEBPACK_IMPORTED_MODULE_4__.settings.nameruleForNonImages || _Config__WEBPACK_IMPORTED_MODULE_5__.Config.defaultNameRuleForNonImages;
+            return _setting_Settings__WEBPACK_IMPORTED_MODULE_5__.settings.nameruleForNonImages || _Config__WEBPACK_IMPORTED_MODULE_6__.Config.defaultNameRuleForNonImages;
         }
     }
     // 生成文件名，传入参数为图片信息
@@ -978,11 +962,11 @@ class FileName {
                 safe: false,
             },
             '{date}': {
-                value: _utils_DateFormat__WEBPACK_IMPORTED_MODULE_3__.DateFormat.format(data.date, _setting_Settings__WEBPACK_IMPORTED_MODULE_4__.settings.dateFormat),
+                value: _utils_DateFormat__WEBPACK_IMPORTED_MODULE_3__.DateFormat.format(data.date, _setting_Settings__WEBPACK_IMPORTED_MODULE_5__.settings.dateFormat),
                 safe: false,
             },
             '{task_date}': {
-                value: _utils_DateFormat__WEBPACK_IMPORTED_MODULE_3__.DateFormat.format(_Store__WEBPACK_IMPORTED_MODULE_1__.store.date, _setting_Settings__WEBPACK_IMPORTED_MODULE_4__.settings.dateFormat),
+                value: _utils_DateFormat__WEBPACK_IMPORTED_MODULE_3__.DateFormat.format(_Store__WEBPACK_IMPORTED_MODULE_1__.store.date, _setting_Settings__WEBPACK_IMPORTED_MODULE_5__.settings.dateFormat),
                 prefix: '',
                 safe: false,
             },
@@ -1059,7 +1043,7 @@ class FileName {
         const resultArr = [];
         let result = '';
         const length = _Store__WEBPACK_IMPORTED_MODULE_1__.store.result.length;
-        if (length < _Config__WEBPACK_IMPORTED_MODULE_5__.Config.outputMax) {
+        if (length < _Config__WEBPACK_IMPORTED_MODULE_6__.Config.outputMax) {
             for (let i = 0; i < length; i++) {
                 const data = _Store__WEBPACK_IMPORTED_MODULE_1__.store.result[i];
                 // 为生成的文件名添加颜色
@@ -1399,6 +1383,16 @@ const filter = new Filter();
 
 /***/ }),
 
+/***/ "./src/ts/FormHTML.html":
+/*!******************************!*\
+  !*** ./src/ts/FormHTML.html ***!
+  \******************************/
+/***/ ((module) => {
+
+module.exports = "<form class=\"settingForm\">\n  <p class=\"option\" data-no=\"2\">\n    <span class=\"settingNameStyle1\" data-xztext=\"_文件类型\"></span>\n\n    <input\n      type=\"checkbox\"\n      name=\"image\"\n      id=\"fileType1\"\n      class=\"need_beautify checkbox_common\"\n      checked\n    />\n    <span class=\"beautify_checkbox\"></span>\n    <label\n      for=\"fileType1\"\n      class=\"has_tip\"\n      data-tip=\"__fileType.image__\"\n      data-xztext=\"_图片\"\n    ></label>\n\n    <input\n      type=\"checkbox\"\n      name=\"music\"\n      id=\"fileType2\"\n      class=\"need_beautify checkbox_common\"\n      checked\n    />\n    <span class=\"beautify_checkbox\"></span>\n    <label\n      for=\"fileType2\"\n      class=\"has_tip\"\n      data-tip=\"__fileType.music__\"\n      data-xztext=\"_音乐\"\n    ></label>\n\n    <input\n      type=\"checkbox\"\n      name=\"video\"\n      id=\"fileType3\"\n      class=\"need_beautify checkbox_common\"\n      checked\n    />\n    <span class=\"beautify_checkbox\"></span>\n    <label\n      for=\"fileType3\"\n      class=\"has_tip\"\n      data-tip=\"__fileType.video__\"\n      data-xztext=\"_视频\"\n    ></label>\n\n    <input\n      type=\"checkbox\"\n      name=\"compressed\"\n      id=\"fileType4\"\n      class=\"need_beautify checkbox_common\"\n      checked\n    />\n    <span class=\"beautify_checkbox\"></span>\n    <label\n      for=\"fileType4\"\n      class=\"has_tip\"\n      data-tip=\"__fileType.compressed__\"\n      data-xztext=\"_压缩文件\"\n    ></label>\n\n    <input\n      type=\"checkbox\"\n      name=\"ps\"\n      id=\"fileType5\"\n      class=\"need_beautify checkbox_common\"\n      checked\n    />\n    <span class=\"beautify_checkbox\"></span>\n    <label\n      for=\"fileType5\"\n      class=\"has_tip\"\n      data-tip=\"__fileType.ps__\"\n      data-xztext=\"_PS文件\"\n    ></label>\n\n    <input\n      type=\"checkbox\"\n      name=\"other\"\n      id=\"fileType6\"\n      class=\"need_beautify checkbox_common\"\n      checked\n    />\n    <span class=\"beautify_checkbox\"></span>\n    <label\n      for=\"fileType6\"\n      class=\"has_tip\"\n      data-tip=\"__fileType.other__\"\n      data-xztext=\"_其他\"\n    ></label>\n  </p>\n\n  <p class=\"option\" data-no=\"21\">\n    <span class=\"settingNameStyle1\" data-xztext=\"_费用类型\"></span>\n\n    <input\n      type=\"checkbox\"\n      name=\"free\"\n      id=\"postType1\"\n      class=\"need_beautify checkbox_common\"\n      checked\n    />\n    <span class=\"beautify_checkbox\"></span>\n    <label for=\"postType1\" data-xztext=\"_免费投稿\"></label>\n\n    <input\n      type=\"checkbox\"\n      name=\"pay\"\n      id=\"postType2\"\n      class=\"need_beautify checkbox_common\"\n      checked\n    />\n    <span class=\"beautify_checkbox\"></span>\n    <label for=\"postType2\" data-xztext=\"_付费投稿\"></label>\n  </p>\n\n  <p class=\"option\" data-no=\"9\">\n    <span class=\"settingNameStyle1\" data-xztext=\"_价格范围\"></span>\n    <input\n      type=\"checkbox\"\n      name=\"feeSwitch\"\n      class=\"need_beautify checkbox_switch\"\n    />\n    <span class=\"beautify_switch\"></span>\n    <span class=\"subOptionWrap\" data-show=\"feeSwitch\">\n      <input\n        type=\"radio\"\n        name=\"feeRange\"\n        id=\"feeRange0\"\n        class=\"need_beautify radio\"\n        value=\"<=\"\n        checked\n      />\n      <span class=\"beautify_radio\" tabindex=\"0\"></span>\n      <label for=\"feeRange0\">&lt;=</label>\n\n      <input\n        type=\"radio\"\n        name=\"feeRange\"\n        id=\"feeRange2\"\n        class=\"need_beautify radio\"\n        value=\"=\"\n      />\n      <span class=\"beautify_radio\" tabindex=\"0\"></span>\n      <label for=\"feeRange2\">=</label>\n\n      <input\n        type=\"radio\"\n        name=\"feeRange\"\n        id=\"feeRange1\"\n        class=\"need_beautify radio\"\n        value=\">=\"\n        checked\n      />\n      <span class=\"beautify_radio\" tabindex=\"0\"></span>\n      <label for=\"feeRange1\">&gt;=</label>\n\n      <input type=\"text\" name=\"fee\" class=\"setinput_style1 blue\" value=\"500\" />\n      ¥\n    </span>\n  </p>\n\n  <p class=\"option\" data-no=\"7\">\n    <span class=\"has_tip settingNameStyle1\" data-xztip=\"_设置id范围提示\">\n      <span data-xztext=\"_id范围\"></span>\n      <span class=\"gray1\"> ? </span>\n    </span>\n    <input\n      type=\"checkbox\"\n      name=\"idRangeSwitch\"\n      class=\"need_beautify checkbox_switch\"\n    />\n    <span class=\"beautify_switch\"></span>\n    <span class=\"subOptionWrap\" data-show=\"idRangeSwitch\">\n      <input\n        type=\"radio\"\n        name=\"idRange\"\n        id=\"idRange2\"\n        class=\"need_beautify radio\"\n        value=\"<\"\n        checked\n      />\n      <span class=\"beautify_radio\"></span>\n      <label for=\"idRange2\" data-xztext=\"_小于\"></label>\n      <input\n        type=\"radio\"\n        name=\"idRange\"\n        id=\"idRange1\"\n        class=\"need_beautify radio\"\n        value=\">\"\n      />\n      <span class=\"beautify_radio\"></span>\n      <label for=\"idRange1\" data-xztext=\"_大于\"></label>\n      <input\n        type=\"text\"\n        name=\"idRangeInput\"\n        class=\"setinput_style1 w100 blue\"\n        value=\"0\"\n      />\n    </span>\n  </p>\n\n  <p class=\"option\" data-no=\"10\">\n    <span class=\"has_tip settingNameStyle1\" data-xztip=\"_设置投稿时间提示\">\n      <span data-xztext=\"_投稿时间\"></span>\n      <span class=\"gray1\"> ? </span>\n    </span>\n\n    <input\n      type=\"checkbox\"\n      name=\"postDate\"\n      class=\"need_beautify checkbox_switch\"\n    />\n    <span class=\"beautify_switch\"></span>\n    <span class=\"subOptionWrap\" data-show=\"postDate\">\n      <input\n        type=\"datetime-local\"\n        name=\"postDateStart\"\n        placeholder=\"yyyy-MM-dd HH:mm\"\n        class=\"setinput_style1 postDate blue\"\n        value=\"\"\n      />\n      &nbsp;-&nbsp;\n      <input\n        type=\"datetime-local\"\n        name=\"postDateEnd\"\n        placeholder=\"yyyy-MM-dd HH:mm\"\n        class=\"setinput_style1 postDate blue\"\n        value=\"\"\n      />\n    </span>\n  </p>\n\n  <p class=\"option\" data-no=\"59\">\n    <span class=\"has_tip settingNameStyle1\" data-xztip=\"_图片尺寸的提示\">\n      <span data-xztext=\"_图片尺寸\"></span>\n      <span class=\"gray1\"> ? </span>\n    </span>\n\n    <input\n      type=\"radio\"\n      name=\"imageSize\"\n      id=\"imageSize1\"\n      class=\"need_beautify radio\"\n      value=\"original\"\n      checked\n    />\n    <span class=\"beautify_radio\" tabindex=\"0\"></span>\n    <label for=\"imageSize1\" data-xztext=\"_原图\"></label>\n    <input\n      type=\"radio\"\n      name=\"imageSize\"\n      id=\"imageSize2\"\n      class=\"need_beautify radio\"\n      value=\"thumbnail\"\n    />\n    <span class=\"beautify_radio\" tabindex=\"0\"></span>\n    <label for=\"imageSize2\" data-xztext=\"_缩略图\"></label>\n    <label for=\"imageSize2\" class=\"gray1\">(1200px)</label>\n  </p>\n\n  <p class=\"option\" data-no=\"22\">\n    <span class=\"settingNameStyle1\" data-xztext=\"_保存投稿中的封面图片\"></span>\n    <input\n      type=\"checkbox\"\n      name=\"savePostCover\"\n      class=\"need_beautify checkbox_switch\"\n      checked\n    />\n    <span class=\"beautify_switch\"></span>\n  </p>\n\n  <p class=\"option\" data-no=\"20\">\n    <span class=\"settingNameStyle1\" data-xztext=\"_保存投稿中的文字\"></span>\n    <input\n      type=\"checkbox\"\n      name=\"saveText\"\n      class=\"need_beautify checkbox_switch\"\n    />\n    <span class=\"beautify_switch\"></span>\n    <span class=\"subOptionWrap\" data-show=\"saveText\">\n      <span class=\"mr4\" data-xztext=\"_格式\"></span>\n      <input\n        type=\"radio\"\n        name=\"textFormat\"\n        id=\"textFormat1\"\n        class=\"need_beautify radio\"\n        value=\"txt\"\n        checked\n      />\n      <span class=\"beautify_radio\" tabindex=\"0\"></span>\n      <label for=\"textFormat1\">TXT</label>\n      <input\n        type=\"radio\"\n        name=\"textFormat\"\n        id=\"textFormat2\"\n        class=\"need_beautify radio\"\n        value=\"html\"\n      />\n      <span class=\"beautify_radio\" tabindex=\"0\"></span>\n      <label for=\"textFormat2\" data-xztext=\"_HTML\"></label>\n      <button\n        type=\"button\"\n        class=\"gray textButton showMsgBtn\"\n        data-title=\"_保存投稿中的文字\"\n        data-msg=\"_保存投稿中的文字的说明\"\n        data-xztext=\"_帮助\"\n      ></button>\n    </span>\n  </p>\n\n  <p class=\"option\" data-no=\"19\">\n    <span class=\"settingNameStyle1\" data-xztext=\"_保存投稿中的外部链接\"></span>\n    <input\n      type=\"checkbox\"\n      name=\"saveLink\"\n      class=\"need_beautify checkbox_switch\"\n      checked\n    />\n    <span class=\"beautify_switch\"></span>\n  </p>\n\n  <p class=\"option\" data-no=\"61\">\n    <span class=\"settingNameStyle1\" data-xztext=\"_保存投稿中的评论\"></span>\n    <input\n      type=\"checkbox\"\n      name=\"saveComment\"\n      class=\"need_beautify checkbox_switch\"\n    />\n    <span class=\"beautify_switch\"></span>\n  </p>\n\n  <p class=\"option\" data-no=\"23\">\n    <span class=\"has_tip settingNameStyle1\" data-xztip=\"_多条文字用逗号分割\">\n      <span data-xztext=\"_投稿标题必须含有文字\"></span>\n      <span class=\"gray1\"> ? </span>\n    </span>\n    <input\n      type=\"checkbox\"\n      name=\"titleMustTextSwitch\"\n      class=\"need_beautify checkbox_switch\"\n    />\n    <span class=\"beautify_switch\"></span>\n    <span class=\"subOptionWrap\" data-show=\"titleMustTextSwitch\">\n      <input\n        type=\"text\"\n        name=\"titleMustText\"\n        class=\"setinput_style1 blue fileNameRule\"\n        value=\"\"\n        placeholder=\"text1,text2,text3\"\n      />\n    </span>\n  </p>\n\n  <p class=\"option\" data-no=\"24\">\n    <span class=\"has_tip settingNameStyle1\" data-xztip=\"_多条文字用逗号分割\">\n      <span data-xztext=\"_投稿标题不能含有文字\"></span>\n      <span class=\"gray1\"> ? </span>\n    </span>\n    <input\n      type=\"checkbox\"\n      name=\"titleCannotTextSwitch\"\n      class=\"need_beautify checkbox_switch\"\n    />\n    <span class=\"beautify_switch\"></span>\n    <span class=\"subOptionWrap\" data-show=\"titleCannotTextSwitch\">\n      <input\n        type=\"text\"\n        name=\"titleCannotText\"\n        class=\"setinput_style1 blue fileNameRule\"\n        value=\"\"\n        placeholder=\"text1,text2,text3\"\n      />\n    </span>\n  </p>\n\n  <p class=\"option\" data-no=\"54\">\n    <span class=\"has_tip settingNameStyle1\" data-xztip=\"_文件指的是附件\">\n      <span data-xztext=\"_文件名中必须含有文字\"></span>\n      <span class=\"gray1\"> ? </span>\n    </span>\n    <input\n      type=\"checkbox\"\n      name=\"fileNameIncludeSwitch\"\n      class=\"need_beautify checkbox_switch\"\n    />\n    <span class=\"beautify_switch\"></span>\n    <span class=\"subOptionWrap\" data-show=\"fileNameIncludeSwitch\">\n      <span data-xztext=\"_任一\"></span>\n      <input\n        type=\"text\"\n        name=\"fileNameInclude\"\n        class=\"setinput_style1 blue fileNameRule\"\n        value=\"\"\n        placeholder=\"text1,text2,text3\"\n      />\n    </span>\n  </p>\n\n  <p class=\"option\" data-no=\"55\">\n    <span class=\"has_tip settingNameStyle1\" data-xztip=\"_文件指的是附件\">\n      <span data-xztext=\"_文件名中不能含有文字\"></span>\n      <span class=\"gray1\"> ? </span>\n    </span>\n    <input\n      type=\"checkbox\"\n      name=\"fileNameExcludeSwitch\"\n      class=\"need_beautify checkbox_switch\"\n    />\n    <span class=\"beautify_switch\"></span>\n    <span class=\"subOptionWrap\" data-show=\"fileNameExcludeSwitch\">\n      <span data-xztext=\"_任一\"></span>\n      <input\n        type=\"text\"\n        name=\"fileNameExclude\"\n        class=\"setinput_style1 blue fileNameRule\"\n        value=\"\"\n        placeholder=\"text1,text2,text3\"\n      />\n    </span>\n  </p>\n\n  <slot data-name=\"crawlBtns\" class=\"centerWrap_btns crawlBtns\"></slot>\n  <slot data-name=\"downloadArea\"></slot>\n  <slot data-name=\"progressBar\"></slot>\n\n  <p class=\"option\" data-no=\"13\">\n    <span class=\"settingNameStyle1\">\n      <span data-xztext=\"_图片的命名规则\"></span>\n    </span>\n    <input\n      type=\"text\"\n      name=\"userSetName\"\n      class=\"setinput_style1 blue fileNameRule\"\n      value=\"__defaultNameRule__\"\n    />\n    &nbsp;\n    <select name=\"fileNameSelect\" class=\"beautify_scrollbar\">\n      <option value=\"default\">…</option>\n      <option value=\"{user}\">{user}</option>\n      <option value=\"{creator_id}\">{creator_id}</option>\n      <option value=\"{user_id}\">{user_id}</option>\n      <option value=\"{title}\">{title}</option>\n      <option value=\"{post_id}\">{post_id}</option>\n      <option value=\"{date}\">{date}</option>\n      <option value=\"{task_date}\">{task_date}</option>\n      <option value=\"{index}\">{index}</option>\n      <option value=\"{name}\">{name}</option>\n      <option value=\"{ext}\">{ext}</option>\n      <option value=\"{fee}\">{fee}</option>\n      <option value=\"{tags}\">{tags}</option>\n    </select>\n    &nbsp;\n    <slot data-name=\"saveNamingRule\"></slot>\n    <button\n      class=\"showFileNameTip textButton\"\n      type=\"button\"\n      data-xztext=\"_提示\"\n    ></button>\n  </p>\n  <p class=\"tip tipWithBtn\" id=\"tipCreateFolder\">\n    <span class=\"left\">\n      <span data-xztext=\"_设置文件夹名的提示\"></span>\n      <strong>__defaultNameRule__</strong>\n    </span>\n    <span class=\"right\">\n      <button\n        type=\"button\"\n        class=\"textButton gray1\"\n        id=\"tipCreateFolderBtn\"\n        data-xztext=\"_我知道了\"\n      ></button>\n    </span>\n  </p>\n  <p class=\"fileNameTip tip\">\n    <span data-xztext=\"_设置文件夹名的提示\"></span>\n    <strong>__defaultNameRule__</strong>\n    <br />\n    <span data-xztext=\"_命名标记提醒\"></span>\n    <br />\n    <span class=\"blue\">{user}</span>\n    <span data-xztext=\"_命名标记user\"></span>\n    <br />\n    <span class=\"blue\">{user_id}</span>\n    <span data-xztext=\"_命名标记uid\"></span>\n    <br />\n    <span class=\"blue\">{creator_id}</span>\n    <span data-xztext=\"_命名标记creator_id\"></span>\n    <br />\n    <span class=\"blue\">{title}</span>\n    <span data-xztext=\"_命名标记title\"></span>\n    <br />\n    <span class=\"blue\">{post_id}</span>\n    <span data-xztext=\"_命名标记postid\"></span>\n    <br />\n    <span class=\"blue\">{date}</span>\n    <span data-xztext=\"_命名标记date\"></span>\n    <br />\n    <span class=\"blue\">{task_date}</span>\n    <span data-xztext=\"_命名标记taskDate\"></span>\n    <br />\n    <span class=\"blue\">{index}</span>\n    <span data-xztext=\"_命名标记index\"></span>\n    <br />\n    <span class=\"blue\">{name}</span>\n    <span data-xztext=\"_命名标记name\"></span>\n    <br />\n    <span class=\"blue\">{ext}</span>\n    <span data-xztext=\"_命名标记ext\"></span>\n    <br />\n    <span class=\"blue\">{fee}</span>\n    <span data-xztext=\"_命名标记fee\"></span>\n    <br />\n    <span class=\"blue\">{tags}</span>\n    <span data-xztext=\"_命名标记tags\"></span>\n  </p>\n\n  <p class=\"option\" data-no=\"33\">\n    <span class=\"settingNameStyle1\" data-xztext=\"_非图片的命名规则\"></span>\n    <input\n      type=\"text\"\n      name=\"nameruleForNonImages\"\n      class=\"setinput_style1 blue nameruleForNonImages\"\n      style=\"width: 300px\"\n      value=\"{user}/{date}-{title}/{name}\"\n    />\n  </p>\n\n  <p class=\"option\" data-no=\"31\">\n    <span class=\"settingNameStyle1\" data-xztext=\"_日期格式\"></span>\n    <input\n      type=\"text\"\n      name=\"dateFormat\"\n      class=\"setinput_style1 blue\"\n      style=\"width: 250px\"\n      value=\"YYYY-MM-DD\"\n    />\n    <button\n      type=\"button\"\n      class=\"gray1 textButton showDateTip\"\n      data-xztext=\"_提示\"\n    ></button>\n  </p>\n  <p class=\"dateFormatTip tip\" style=\"display: none\">\n    <span data-xztext=\"_日期格式提示\"></span>\n    <br />\n    <span class=\"blue\">YYYY</span> <span>2021</span>\n    <br />\n    <span class=\"blue\">YY</span> <span>21</span>\n    <br />\n    <span class=\"blue\">MM</span> <span>04</span>\n    <br />\n    <span class=\"blue\">MMM</span> <span>Apr</span>\n    <br />\n    <span class=\"blue\">MMMM</span> <span>April</span>\n    <br />\n    <span class=\"blue\">DD</span> <span>30</span>\n    <br />\n    <span class=\"blue\">hh</span> <span>06</span>\n    <br />\n    <span class=\"blue\">mm</span> <span>40</span>\n    <br />\n    <span class=\"blue\">ss</span> <span>08</span>\n    <br />\n  </p>\n\n  <p class=\"option\" data-no=\"46\">\n    <span class=\"has_tip settingNameStyle1\" data-xztip=\"_在序号前面填充0的说明\">\n      <span data-xztext=\"_在序号前面填充0\"></span>\n      <span class=\"gray1\"> ? </span></span\n    >\n    <input\n      type=\"checkbox\"\n      name=\"zeroPadding\"\n      class=\"need_beautify checkbox_switch\"\n    />\n    <span class=\"beautify_switch\" tabindex=\"0\"></span>\n    <span class=\"subOptionWrap\" data-show=\"zeroPadding\">\n      <span data-xztext=\"_序号总长度\"></span>\n      <input\n        type=\"text\"\n        name=\"zeroPaddingLength\"\n        class=\"setinput_style1 blue\"\n        value=\"3\"\n        style=\"width: 30px; min-width: 30px\"\n      />\n    </span>\n  </p>\n\n  <p class=\"option\" data-no=\"17\">\n    <span class=\"has_tip settingNameStyle1\" data-xztip=\"_自动下载的提示\">\n      <span data-xztext=\"_自动开始下载\"></span>\n      <span class=\"gray1\"> ? </span>\n    </span>\n    <input\n      type=\"checkbox\"\n      name=\"autoStartDownload\"\n      id=\"setQuietDownload\"\n      class=\"need_beautify checkbox_switch\"\n      checked\n    />\n    <span class=\"beautify_switch\"></span>\n  </p>\n\n  <p class=\"option\" data-no=\"16\">\n    <span class=\"has_tip settingNameStyle1\" data-xztip=\"_线程数字\">\n      <span data-xztext=\"_下载线程\"></span>\n      <span class=\"gray1\"> ? </span>\n    </span>\n    <input\n      type=\"text\"\n      name=\"downloadThread\"\n      class=\"has_tip setinput_style1 blue\"\n      data-xztip=\"_线程数字\"\n      value=\"3\"\n    />\n  </p>\n\n  <p class=\"option\" data-no=\"52\">\n    <span\n      class=\"has_tip settingNameStyle1\"\n      data-xztip=\"_下载完成后显示通知的说明\"\n    >\n      <span data-xztext=\"_下载完成后显示通知\"></span>\n      <span class=\"gray1\"> ? </span>\n    </span>\n    <input\n      type=\"checkbox\"\n      name=\"showNotificationAfterDownloadComplete\"\n      class=\"need_beautify checkbox_switch\"\n    />\n    <span class=\"beautify_switch\" tabindex=\"0\"></span>\n  </p>\n\n  <p class=\"option\" data-no=\"57\">\n    <span class=\"has_tip settingNameStyle1\" data-xztip=\"_抓取间隔的说明\">\n      <span data-xztext=\"_抓取间隔\"></span>\n      <span class=\"gray1\"> ? </span>\n    </span>\n\n    <span data-xztext=\"_间隔时间\"></span>\n    <input\n      type=\"text\"\n      name=\"crawlInterval\"\n      class=\"setinput_style1 blue\"\n      value=\"1\"\n    />\n    <span data-xztext=\"_秒\"></span>\n  </p>\n\n  <p class=\"option\" data-no=\"56\">\n    <span class=\"has_tip settingNameStyle1\" data-xztip=\"_下载间隔的说明\">\n      <span data-xztext=\"_下载间隔\"></span>\n      <span class=\"gray1\"> ? </span>\n    </span>\n\n    <span data-xztext=\"_间隔时间\"></span>\n    <input\n      type=\"text\"\n      name=\"downloadInterval\"\n      class=\"setinput_style1 blue\"\n      value=\"1\"\n    />\n    <span data-xztext=\"_秒\"></span>\n  </p>\n\n  <p class=\"option\" data-no=\"58\">\n    <span\n      class=\"has_tip settingNameStyle1\"\n      data-xztip=\"_每天下载的文件大小限制的说明\"\n    >\n      <span data-xztext=\"_每天下载的文件大小限制\"></span>\n      <span class=\"gray1\"> ? </span>\n    </span>\n    <input\n      type=\"checkbox\"\n      name=\"totalDownloadLimitSwitch\"\n      class=\"need_beautify checkbox_switch\"\n      checked\n    />\n    <span class=\"beautify_switch\" tabindex=\"0\"></span>\n\n    <span class=\"subOptionWrap\" data-show=\"totalDownloadLimitSwitch\">\n      <input\n        type=\"text\"\n        name=\"totalDownloadLimit\"\n        class=\"setinput_style1 blue\"\n        value=\"10\"\n      />\n      <span>GiB</span>\n    </span>\n    <button\n      class=\"textButton gray1\"\n      type=\"button\"\n      id=\"totalDownloadHistory\"\n      data-xztext=\"_查看历史数据\"\n    ></button>\n  </p>\n\n  <p class=\"option\" data-no=\"28\">\n    <span class=\"has_tip settingNameStyle1\" data-xztip=\"_不下载重复文件的提示\">\n      <span data-xztext=\"_不下载重复文件\"></span>\n      <span class=\"gray1\"> ? </span></span\n    >\n    <input\n      type=\"checkbox\"\n      name=\"deduplication\"\n      class=\"need_beautify checkbox_switch\"\n    />\n    <span class=\"beautify_switch\" tabindex=\"0\"></span>\n    <span class=\"subOptionWrap\" data-show=\"deduplication\">\n      <button\n        class=\"textButton gray1\"\n        type=\"button\"\n        id=\"exportDownloadRecord\"\n        data-xztext=\"_导出\"\n      ></button>\n      <button\n        class=\"textButton gray1\"\n        type=\"button\"\n        id=\"importDownloadRecord\"\n        data-xztext=\"_导入\"\n      ></button>\n      <button\n        class=\"textButton gray1\"\n        type=\"button\"\n        id=\"clearDownloadRecord\"\n        data-xztext=\"_清除\"\n      ></button>\n    </span>\n    <button\n      class=\"textButton gray1\"\n      type=\"button\"\n      id=\"deduplicationHelp\"\n      data-xztext=\"_提示\"\n    ></button>\n  </p>\n\n  <p class=\"option\" data-no=\"18\">\n    <span class=\"has_tip settingNameStyle1\" data-xztip=\"_统一网址格式的说明\">\n      <span data-xztext=\"_统一网址格式\"></span>\n      <span class=\"gray1\"> ? </span>\n    </span>\n    <input\n      type=\"checkbox\"\n      name=\"unifiedURL\"\n      class=\"need_beautify checkbox_switch\"\n      checked\n    />\n    <span class=\"beautify_switch\"></span>\n  </p>\n\n  <p class=\"option\" data-no=\"53\">\n    <span class=\"settingNameStyle1\" data-xztext=\"_高亮显示关键字\"></span>\n    <input\n      type=\"checkbox\"\n      name=\"boldKeywords\"\n      class=\"need_beautify checkbox_switch\"\n    />\n    <span class=\"beautify_switch\" tabindex=\"0\"></span>\n  </p>\n\n  <p class=\"option\" data-no=\"41\">\n    <span class=\"settingNameStyle1\" data-xztext=\"_背景图片\"> </span>\n    <input\n      type=\"checkbox\"\n      name=\"bgDisplay\"\n      class=\"need_beautify checkbox_switch\"\n    />\n    <span class=\"beautify_switch\" tabindex=\"0\"></span>\n\n    <span class=\"subOptionWrap\" data-show=\"bgDisplay\">\n      <button\n        class=\"textButton gray1\"\n        type=\"button\"\n        id=\"selectBG\"\n        data-xztext=\"_选择文件\"\n      ></button>\n      <button\n        class=\"textButton gray1\"\n        type=\"button\"\n        id=\"clearBG\"\n        data-xztext=\"_清除\"\n      ></button>\n\n      &nbsp;\n      <span data-xztext=\"_对齐方式\"></span>&nbsp;\n      <input\n        type=\"radio\"\n        name=\"bgPositionY\"\n        id=\"bgPosition1\"\n        class=\"need_beautify radio\"\n        value=\"center\"\n        checked\n      />\n      <span class=\"beautify_radio\" tabindex=\"0\"></span>\n      <label for=\"bgPosition1\" data-xztext=\"_居中\"></label>\n      <input\n        type=\"radio\"\n        name=\"bgPositionY\"\n        id=\"bgPosition2\"\n        class=\"need_beautify radio\"\n        value=\"top\"\n      />\n      <span class=\"beautify_radio\" tabindex=\"0\"></span>\n      <label for=\"bgPosition2\" data-xztext=\"_顶部\"></label>\n      <span data-xztext=\"_不透明度\"></span>&nbsp;\n      <input name=\"bgOpacity\" type=\"range\" />\n    </span>\n  </p>\n\n  <p class=\"option\" data-no=\"60\">\n    <span class=\"settingNameStyle1\" data-xztext=\"_颜色主题\"></span>\n    <input\n      type=\"radio\"\n      name=\"theme\"\n      id=\"theme1\"\n      class=\"need_beautify radio\"\n      value=\"auto\"\n      checked\n    />\n    <span class=\"beautify_radio\" tabindex=\"0\"></span>\n    <label for=\"theme1\" data-xztext=\"_自动检测\"></label>\n    <input\n      type=\"radio\"\n      name=\"theme\"\n      id=\"theme2\"\n      class=\"need_beautify radio\"\n      value=\"white\"\n    />\n    <span class=\"beautify_radio\" tabindex=\"0\"></span>\n    <label for=\"theme2\">White</label>\n    <input\n      type=\"radio\"\n      name=\"theme\"\n      id=\"theme3\"\n      class=\"need_beautify radio\"\n      value=\"dark\"\n    />\n    <span class=\"beautify_radio\" tabindex=\"0\"></span>\n    <label for=\"theme3\">Dark</label>\n  </p>\n\n  <p class=\"option\" data-no=\"32\">\n    <span class=\"settingNameStyle1\"><span class=\"key\">Language</span></span>\n    <input\n      type=\"radio\"\n      name=\"userSetLang\"\n      id=\"userSetLang1\"\n      class=\"need_beautify radio\"\n      value=\"auto\"\n      checked\n    />\n    <span class=\"beautify_radio\" tabindex=\"0\"></span>\n    <label for=\"userSetLang1\" data-xztext=\"_自动检测\"></label>\n    <input\n      type=\"radio\"\n      name=\"userSetLang\"\n      id=\"userSetLang2\"\n      class=\"need_beautify radio\"\n      value=\"zh-cn\"\n    />\n    <span class=\"beautify_radio\" tabindex=\"0\"></span>\n    <label for=\"userSetLang2\">简体中文</label>\n    <input\n      type=\"radio\"\n      name=\"userSetLang\"\n      id=\"userSetLang3\"\n      class=\"need_beautify radio\"\n      value=\"zh-tw\"\n    />\n    <span class=\"beautify_radio\" tabindex=\"0\"></span>\n    <label for=\"userSetLang3\">繁體中文</label>\n    <input\n      type=\"radio\"\n      name=\"userSetLang\"\n      id=\"userSetLang4\"\n      class=\"need_beautify radio\"\n      value=\"ja\"\n    />\n    <span class=\"beautify_radio\" tabindex=\"0\"></span>\n    <label for=\"userSetLang4\">日本語</label>\n    <input\n      type=\"radio\"\n      name=\"userSetLang\"\n      id=\"userSetLang5\"\n      class=\"need_beautify radio\"\n      value=\"en\"\n    />\n    <span class=\"beautify_radio\" tabindex=\"0\"></span>\n    <label for=\"userSetLang5\">English</label>\n    <input\n      type=\"radio\"\n      name=\"userSetLang\"\n      id=\"userSetLang6\"\n      class=\"need_beautify radio\"\n      value=\"ko\"\n    />\n    <span class=\"beautify_radio\" tabindex=\"0\"></span>\n    <label for=\"userSetLang6\">한국어</label>\n    <input\n      type=\"radio\"\n      name=\"userSetLang\"\n      id=\"userSetLang7\"\n      class=\"need_beautify radio\"\n      value=\"ru\"\n    />\n    <span class=\"beautify_radio\" tabindex=\"0\"></span>\n    <label for=\"userSetLang7\">Русский</label>\n  </p>\n\n  <p class=\"option\" data-no=\"37\">\n    <span class=\"settingNameStyle1\" data-xztext=\"_管理设置\"></span>\n    <button\n      class=\"textButton gray1\"\n      type=\"button\"\n      id=\"exportSettings\"\n      data-xztext=\"_导出设置\"\n    ></button>\n    <button\n      class=\"textButton gray1\"\n      type=\"button\"\n      id=\"importSettings\"\n      data-xztext=\"_导入设置\"\n    ></button>\n    <button\n      class=\"textButton gray1\"\n      type=\"button\"\n      id=\"resetSettings\"\n      data-xztext=\"_重置设置\"\n    ></button>\n  </p>\n\n  <p class=\"option\" data-no=\"51\">\n    <span class=\"has_tip settingNameStyle1\" data-xztip=\"_显示高级设置说明\">\n      <span data-xztext=\"_显示高级设置\"></span>\n      <span class=\"gray1\"> ? </span></span\n    >\n    <input\n      type=\"checkbox\"\n      name=\"showAdvancedSettings\"\n      class=\"need_beautify checkbox_switch\"\n    />\n    <span class=\"beautify_switch\" tabindex=\"0\"></span>\n  </p>\n</form>\n";
+
+/***/ }),
+
 /***/ "./src/ts/FormHTML.ts":
 /*!****************************!*\
   !*** ./src/ts/FormHTML.ts ***!
@@ -1409,499 +1403,20 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
 /* harmony export */   formHtml: () => (/* binding */ formHtml)
 /* harmony export */ });
-/* harmony import */ var _Config__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./Config */ "./src/ts/Config.ts");
+/* harmony import */ var _FormHTML_html__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./FormHTML.html */ "./src/ts/FormHTML.html");
+/* harmony import */ var _Config__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./Config */ "./src/ts/Config.ts");
 
-// 已使用的最大编号为 61
-const formHtml = `<form class="settingForm">
-    <p class="option" data-no="2">
-    <span class="settingNameStyle1" data-xztext="_文件类型"></span>
 
-    <input type="checkbox" name="image" id="fileType1" class="need_beautify checkbox_common" checked>
-    <span class="beautify_checkbox"></span>
-    <label for="fileType1" class="has_tip" data-tip="${_Config__WEBPACK_IMPORTED_MODULE_0__.Config.fileType.image.join()}" data-xztext="_图片"></label>
-    
-    <input type="checkbox" name="music" id="fileType2" class="need_beautify checkbox_common" checked>
-    <span class="beautify_checkbox"></span>
-    <label for="fileType2" class="has_tip" data-tip="${_Config__WEBPACK_IMPORTED_MODULE_0__.Config.fileType.music.join()}" data-xztext="_音乐"></label>
-
-    <input type="checkbox" name="video" id="fileType3" class="need_beautify checkbox_common" checked>
-    <span class="beautify_checkbox"></span>
-    <label for="fileType3" class="has_tip" data-tip="${_Config__WEBPACK_IMPORTED_MODULE_0__.Config.fileType.video.join()}" data-xztext="_视频"></label>
-    
-    <input type="checkbox" name="compressed" id="fileType4" class="need_beautify checkbox_common" checked>
-    <span class="beautify_checkbox"></span>
-    <label for="fileType4" class="has_tip" data-tip="${_Config__WEBPACK_IMPORTED_MODULE_0__.Config.fileType.compressed.join()}" data-xztext="_压缩文件"></label>
-    
-    <input type="checkbox" name="ps" id="fileType5" class="need_beautify checkbox_common" checked>
-    <span class="beautify_checkbox"></span>
-    <label for="fileType5" class="has_tip" data-tip="${_Config__WEBPACK_IMPORTED_MODULE_0__.Config.fileType.ps.join()}" data-xztext="_PS文件"></label>
-
-    <input type="checkbox" name="other" id="fileType6" class="need_beautify checkbox_common" checked>
-    <span class="beautify_checkbox"></span>
-    <label for="fileType6" class="has_tip" data-tip="${_Config__WEBPACK_IMPORTED_MODULE_0__.Config.fileType.other.join()}" data-xztext="_其他"></label>
-    </p>
-
-    <p class="option" data-no="21">
-    <span class="settingNameStyle1" data-xztext="_费用类型"></span>
-
-    <input type="checkbox" name="free" id="postType1" class="need_beautify checkbox_common" checked>
-    <span class="beautify_checkbox"></span>
-    <label for="postType1" data-xztext="_免费投稿"></label>
-
-    <input type="checkbox" name="pay" id="postType2" class="need_beautify checkbox_common" checked>
-    <span class="beautify_checkbox"></span>
-    <label for="postType2" data-xztext="_付费投稿"></label>
-    </p>
-
-    <p class="option" data-no="9">
-    <span class="settingNameStyle1" data-xztext="_价格范围"></span>
-    <input type="checkbox" name="feeSwitch" class="need_beautify checkbox_switch">
-    <span class="beautify_switch"></span>
-    <span class="subOptionWrap" data-show="feeSwitch">
-
-    <input type="radio" name="feeRange" id="feeRange0" class="need_beautify radio" value="<=" checked>
-    <span class="beautify_radio" tabindex="0"></span>
-    <label for="feeRange0">&lt;=</label>
-
-    <input type="radio" name="feeRange" id="feeRange2" class="need_beautify radio" value="=">
-    <span class="beautify_radio" tabindex="0"></span>
-    <label for="feeRange2">=</label>
-
-    <input type="radio" name="feeRange" id="feeRange1" class="need_beautify radio" value=">=" checked>
-    <span class="beautify_radio" tabindex="0"></span>
-    <label for="feeRange1">&gt;=</label>
-    
-    <input type="text" name="fee" class="setinput_style1 blue" value="500"> ¥
-
-    </span>
-    </p>
-    
-    <p class="option" data-no="7">
-    <span class="has_tip settingNameStyle1" data-xztip="_设置id范围提示">
-    <span data-xztext="_id范围"></span>
-    <span class="gray1"> ? </span>
-    </span>
-    <input type="checkbox" name="idRangeSwitch" class="need_beautify checkbox_switch">
-    <span class="beautify_switch"></span>
-    <span class="subOptionWrap" data-show="idRangeSwitch">
-    <input type="radio" name="idRange" id="idRange2" class="need_beautify radio" value="<" checked>
-    <span class="beautify_radio"></span>
-    <label for="idRange2" data-xztext="_小于"></label>
-    <input type="radio" name="idRange" id="idRange1" class="need_beautify radio" value=">">
-    <span class="beautify_radio"></span>
-    <label for="idRange1" data-xztext="_大于"></label>
-    <input type="text" name="idRangeInput" class="setinput_style1 w100 blue" value="0">
-    </span>
-    </p>
-
-    <p class="option" data-no="10">
-    <span class="has_tip settingNameStyle1" data-xztip="_设置投稿时间提示">
-    <span data-xztext="_投稿时间"></span>
-    <span class="gray1"> ? </span>
-    </span>
-
-    <input type="checkbox" name="postDate" class="need_beautify checkbox_switch">
-    <span class="beautify_switch"></span>
-    <span class="subOptionWrap" data-show="postDate">
-    <input type="datetime-local" name="postDateStart" placeholder="yyyy-MM-dd HH:mm" class="setinput_style1 postDate blue" value="">
-    &nbsp;-&nbsp;
-    <input type="datetime-local" name="postDateEnd" placeholder="yyyy-MM-dd HH:mm" class="setinput_style1 postDate blue" value="">
-    </span>
-    </p>
-
-    <p class="option" data-no="59">
-      <span class="has_tip settingNameStyle1" data-xztip="_图片尺寸的提示">
-      <span data-xztext="_图片尺寸"></span>
-      <span class="gray1"> ? </span>
-    </span>
-
-    <input type="radio" name="imageSize" id="imageSize1" class="need_beautify radio" value="original" checked>
-    <span class="beautify_radio" tabindex="0"></span>
-    <label for="imageSize1" data-xztext="_原图"></label>
-    <input type="radio" name="imageSize" id="imageSize2" class="need_beautify radio" value="thumbnail">
-    <span class="beautify_radio" tabindex="0"></span>
-    <label for="imageSize2" data-xztext="_缩略图"></label>
-    <label for="imageSize2" class="gray1">(1200px)</label>
-    </p>
-    
-    <p class="option" data-no="22">
-    <span class="settingNameStyle1" data-xztext="_保存投稿中的封面图片"></span>
-    <input type="checkbox" name="savePostCover" class="need_beautify checkbox_switch" checked>
-    <span class="beautify_switch"></span>
-    </p>
-
-    <p class="option" data-no="19">
-    <span class="settingNameStyle1" data-xztext="_保存投稿中的外部链接"></span>
-    <input type="checkbox" name="saveLink" class="need_beautify checkbox_switch" checked>
-    <span class="beautify_switch"></span>
-    </p>
-
-    <p class="option" data-no="20">
-    <span class="settingNameStyle1" data-xztext="_保存投稿中的文字"></span>
-    <input type="checkbox" name="saveText" class="need_beautify checkbox_switch">
-    <span class="beautify_switch"></span>
-    <span class="subOptionWrap" data-show="saveText">
-    <input type="radio" name="textFormat" id="textFormat1" class="need_beautify radio" value="txt" checked>
-    <span class="beautify_radio" tabindex="0"></span>
-    <label for="textFormat1" data-xztext="_纯文本"></label>
-    <input type="radio" name="textFormat" id="textFormat2" class="need_beautify radio" value="html">
-    <span class="beautify_radio" tabindex="0"></span>
-    <label for="textFormat2" data-xztext="_HTML"></label>
-    </span>
-    </p>
-
-    <p class="option" data-no="61">
-    <span class="settingNameStyle1" data-xztext="_保存投稿中的评论"></span>
-    <input type="checkbox" name="saveComment" class="need_beautify checkbox_switch">
-    <span class="beautify_switch"></span>
-    </p>
-
-    <p class="option" data-no="23">
-    <span class="has_tip settingNameStyle1" data-xztip="_多条文字用逗号分割">
-    <span data-xztext="_投稿标题必须含有文字"></span>
-    <span class="gray1"> ? </span>
-    </span>
-    <input type="checkbox" name="titleMustTextSwitch" class="need_beautify checkbox_switch">
-    <span class="beautify_switch"></span>
-    <span class="subOptionWrap" data-show="titleMustTextSwitch">
-    <input type="text" name="titleMustText" class="setinput_style1 blue fileNameRule" value="" placeholder="text1,text2,text3">
-    </span>
-    </p>
-
-    <p class="option" data-no="24">
-    <span class="has_tip settingNameStyle1" data-xztip="_多条文字用逗号分割">
-    <span data-xztext="_投稿标题不能含有文字"></span>
-    <span class="gray1"> ? </span>
-    </span>
-    <input type="checkbox" name="titleCannotTextSwitch" class="need_beautify checkbox_switch">
-    <span class="beautify_switch"></span>
-    <span class="subOptionWrap" data-show="titleCannotTextSwitch">
-    <input type="text" name="titleCannotText" class="setinput_style1 blue fileNameRule" value="" placeholder="text1,text2,text3">
-    </span>
-    </p>
-
-    <p class="option" data-no="54">
-    <span class="has_tip settingNameStyle1" data-xztip="_文件指的是附件">
-    <span data-xztext="_文件名中必须含有文字"></span>
-    <span class="gray1"> ? </span>
-    </span>
-    <input type="checkbox" name="fileNameIncludeSwitch" class="need_beautify checkbox_switch">
-    <span class="beautify_switch"></span>
-    <span class="subOptionWrap" data-show="fileNameIncludeSwitch">
-    <span data-xztext="_任一"></span>
-    <input type="text" name="fileNameInclude" class="setinput_style1 blue fileNameRule" value="" placeholder="text1,text2,text3">
-    </span>
-    </p>
-
-    <p class="option" data-no="55">
-    <span class="has_tip settingNameStyle1" data-xztip="_文件指的是附件">
-    <span data-xztext="_文件名中不能含有文字"></span>
-    <span class="gray1"> ? </span>
-    </span>
-    <input type="checkbox" name="fileNameExcludeSwitch" class="need_beautify checkbox_switch">
-    <span class="beautify_switch"></span>
-    <span class="subOptionWrap" data-show="fileNameExcludeSwitch">
-    <span data-xztext="_任一"></span>
-    <input type="text" name="fileNameExclude" class="setinput_style1 blue fileNameRule" value="" placeholder="text1,text2,text3">
-    </span>
-    </p>
-
-    <slot data-name="crawlBtns" class="centerWrap_btns crawlBtns"></slot>
-    <slot data-name="downloadArea"></slot>
-    <slot data-name="progressBar"></slot>
-
-    <p class="option" data-no="13">
-      <span class="settingNameStyle1">
-      <span data-xztext="_图片的命名规则"></span>
-      </span>
-      <input type="text" name="userSetName" class="setinput_style1 blue fileNameRule" value="${_Config__WEBPACK_IMPORTED_MODULE_0__.Config.defaultNameRule}">
-      &nbsp;
-      <select name="fileNameSelect" class="beautify_scrollbar">
-        <option value="default">…</option>
-        <option value="{user}">{user}</option>
-        <option value="{creator_id}">{creator_id}</option>
-        <option value="{user_id}">{user_id}</option>
-        <option value="{title}">{title}</option>
-        <option value="{post_id}">{post_id}</option>
-        <option value="{date}">{date}</option>
-        <option value="{task_date}">{task_date}</option>
-        <option value="{index}">{index}</option>
-        <option value="{name}">{name}</option>
-        <option value="{ext}">{ext}</option>
-        <option value="{fee}">{fee}</option>
-        <option value="{tags}">{tags}</option>
-        </select>
-      &nbsp;
-      <slot data-name="saveNamingRule"></slot>
-      <button class="showFileNameTip textButton" type="button" data-xztext="_提示"></button>
-      </p>
-      <p class="tip tipWithBtn" id="tipCreateFolder">
-      <span class="left">
-      <span data-xztext="_设置文件夹名的提示"></span>
-      <strong>${_Config__WEBPACK_IMPORTED_MODULE_0__.Config.defaultNameRule}</strong>
-      </span>
-      <span class="right">
-        <button type="button" class="textButton gray1" id="tipCreateFolderBtn" data-xztext="_我知道了">
-        </button>
-      </span>
-    </p>
-    <p class="fileNameTip tip">
-      <span data-xztext="_设置文件夹名的提示"></span>
-      <strong>${_Config__WEBPACK_IMPORTED_MODULE_0__.Config.defaultNameRule}</strong>
-      <br>
-      <span data-xztext="_命名标记提醒"></span>
-      <br>
-      <span class="blue">{user}</span>
-    <span data-xztext="_命名标记user"></span>
-      <br>
-      <span class="blue">{user_id}</span>
-    <span data-xztext="_命名标记uid"></span>
-      <br>
-      <span class="blue">{creator_id}</span>
-    <span data-xztext="_命名标记creator_id"></span>
-      <br>
-      <span class="blue">{title}</span>
-    <span data-xztext="_命名标记title"></span>
-      <br>
-      <span class="blue">{post_id}</span>
-    <span data-xztext="_命名标记postid"></span>
-      <br>
-      <span class="blue">{date}</span>
-    <span data-xztext="_命名标记date"></span>
-      <br>
-      <span class="blue">{task_date}</span>
-    <span data-xztext="_命名标记taskDate"></span>
-      <br>
-      <span class="blue">{index}</span>
-    <span data-xztext="_命名标记index"></span>
-      <br>
-      <span class="blue">{name}</span>
-    <span data-xztext="_命名标记name"></span>
-      <br>
-      <span class="blue">{ext}</span>
-    <span data-xztext="_命名标记ext"></span>
-      <br>
-      <span class="blue">{fee}</span>
-    <span data-xztext="_命名标记fee"></span>
-      <br>
-      <span class="blue">{tags}</span>
-    <span data-xztext="_命名标记tags"></span>
-    </p>
-    
-    <p class="option" data-no="33">
-    <span class="settingNameStyle1" data-xztext="_非图片的命名规则"></span>
-    <input type="text" name="nameruleForNonImages" class="setinput_style1 blue nameruleForNonImages" style="width:300px;" value="{user}/{date}-{title}/{name}">
-    </p>
-
-    <p class="option" data-no="31">
-    <span class="settingNameStyle1" data-xztext="_日期格式"></span>
-    <input type="text" name="dateFormat" class="setinput_style1 blue" style="width:250px;" value="YYYY-MM-DD">
-    <button type="button" class="gray1 textButton showDateTip" data-xztext="_提示"></button>
-    </p>
-    <p class="dateFormatTip tip" style="display:none">
-    <span data-xztext="_日期格式提示"></span>
-    <br>
-    <span class="blue">YYYY</span> <span>2021</span>
-    <br>
-    <span class="blue">YY</span> <span>21</span>
-    <br>
-    <span class="blue">MM</span> <span>04</span>
-    <br>
-    <span class="blue">MMM</span> <span>Apr</span>
-    <br>
-    <span class="blue">MMMM</span> <span>April</span>
-    <br>
-    <span class="blue">DD</span> <span>30</span>
-    <br>
-    <span class="blue">hh</span> <span>06</span>
-    <br>
-    <span class="blue">mm</span> <span>40</span>
-    <br>
-    <span class="blue">ss</span> <span>08</span>
-    <br>
-    </p>
-
-    <p class="option" data-no="46">
-    <span class="has_tip settingNameStyle1" data-xztip="_在序号前面填充0的说明">
-    <span data-xztext="_在序号前面填充0"></span>
-    <span class="gray1"> ? </span></span>
-    <input type="checkbox" name="zeroPadding" class="need_beautify checkbox_switch" >
-    <span class="beautify_switch" tabindex="0"></span>
-    <span class="subOptionWrap" data-show="zeroPadding">
-    <span data-xztext="_序号总长度"></span>
-    <input type="text" name="zeroPaddingLength" class="setinput_style1 blue" value="3" style="width:30px;min-width: 30px;">
-    </span>
-    </p>
-
-    <p class="option" data-no="17">
-    <span class="has_tip settingNameStyle1" data-xztip="_自动下载的提示">
-    <span data-xztext="_自动开始下载"></span>
-    <span class="gray1"> ? </span>
-    </span>
-    <input type="checkbox" name="autoStartDownload" id="setQuietDownload" class="need_beautify checkbox_switch" checked>
-    <span class="beautify_switch"></span>
-    </p>
-
-    <p class="option" data-no="16">
-    <span class="has_tip settingNameStyle1"  data-xztip="_线程数字">
-    <span data-xztext="_下载线程"></span>
-    <span class="gray1"> ? </span>
-    </span>
-    <input type="text" name="downloadThread" class="has_tip setinput_style1 blue" data-xztip="_线程数字" value="3">
-    </p>
-
-    <p class="option" data-no="52">
-    <span class="has_tip settingNameStyle1"  data-xztip="_下载完成后显示通知的说明">
-    <span data-xztext="_下载完成后显示通知"></span>
-    <span class="gray1"> ? </span>
-    </span>
-    <input type="checkbox" name="showNotificationAfterDownloadComplete" class="need_beautify checkbox_switch">
-    <span class="beautify_switch" tabindex="0"></span>
-    </p>
-
-    <p class="option" data-no="57">
-    <span class="has_tip settingNameStyle1"  data-xztip="_抓取间隔的说明">
-    <span data-xztext="_抓取间隔"></span>
-    <span class="gray1"> ? </span>
-    </span>
-    
-    <span data-xztext="_间隔时间"></span>
-    <input type="text" name="crawlInterval" class="setinput_style1 blue" value="1">
-    <span data-xztext="_秒"></span>
-    </p>
-    
-    <p class="option" data-no="56">
-    <span class="has_tip settingNameStyle1"  data-xztip="_下载间隔的说明">
-    <span data-xztext="_下载间隔"></span>
-    <span class="gray1"> ? </span>
-    </span>
-    
-    <span data-xztext="_间隔时间"></span>
-    <input type="text" name="downloadInterval" class="setinput_style1 blue" value="1">
-    <span data-xztext="_秒"></span>
-    </p>
-    
-    <p class="option" data-no="58">
-    <span class="has_tip settingNameStyle1"  data-xztip="_每天下载的文件大小限制的说明">
-    <span data-xztext="_每天下载的文件大小限制"></span>
-    <span class="gray1"> ? </span>
-    </span>
-    <input type="checkbox" name="totalDownloadLimitSwitch" class="need_beautify checkbox_switch" checked>
-    <span class="beautify_switch" tabindex="0"></span>
-    
-    <span class="subOptionWrap" data-show="totalDownloadLimitSwitch">
-    <input type="text" name="totalDownloadLimit" class="setinput_style1 blue" value="10">
-    <span>GiB</span>
-    </span>
-    <button class="textButton gray1" type="button" id="totalDownloadHistory" data-xztext="_查看历史数据"></button>
-    </p>
-      
-    <p class="option" data-no="28">
-    <span class="has_tip settingNameStyle1" data-xztip="_不下载重复文件的提示">
-    <span data-xztext="_不下载重复文件"></span>
-    <span class="gray1"> ? </span></span>
-    <input type="checkbox" name="deduplication" class="need_beautify checkbox_switch">
-    <span class="beautify_switch" tabindex="0"></span>
-    <span class="subOptionWrap" data-show="deduplication">
-    <button class="textButton gray1" type="button" id="exportDownloadRecord" data-xztext="_导出"></button>
-    <button class="textButton gray1" type="button" id="importDownloadRecord" data-xztext="_导入"></button>
-    <button class="textButton gray1" type="button" id="clearDownloadRecord" data-xztext="_清除"></button>
-    </span>
-    <button class="textButton gray1" type="button" id="deduplicationHelp" data-xztext="_提示"></button>
-    </p>
-
-    <p class="option" data-no="18">
-    <span class="has_tip settingNameStyle1" data-xztip="_统一网址格式的说明">
-    <span data-xztext="_统一网址格式"></span>
-    <span class="gray1"> ? </span>
-    </span>
-    <input type="checkbox" name="unifiedURL" class="need_beautify checkbox_switch" checked>
-    <span class="beautify_switch"></span>
-    </p>
-      
-    <p class="option" data-no="53">
-    <span class="settingNameStyle1" data-xztext="_高亮显示关键字"></span>
-    <input type="checkbox" name="boldKeywords" class="need_beautify checkbox_switch">
-    <span class="beautify_switch" tabindex="0"></span>
-    </p>
-
-    <p class="option" data-no="41">
-    <span class="settingNameStyle1" data-xztext="_背景图片"> </span>
-    <input type="checkbox" name="bgDisplay" class="need_beautify checkbox_switch">
-    <span class="beautify_switch" tabindex="0"></span>
-
-    <span class="subOptionWrap" data-show="bgDisplay">
-
-    <button class="textButton gray1" type="button" id="selectBG" data-xztext="_选择文件"></button>
-    <button class="textButton gray1" type="button" id="clearBG" data-xztext="_清除"></button>
-    
-    &nbsp;
-    <span data-xztext="_对齐方式"></span>&nbsp;
-    <input type="radio" name="bgPositionY" id="bgPosition1" class="need_beautify radio" value="center" checked>
-    <span class="beautify_radio" tabindex="0"></span>
-    <label for="bgPosition1" data-xztext="_居中"></label>
-    <input type="radio" name="bgPositionY" id="bgPosition2" class="need_beautify radio" value="top">
-    <span class="beautify_radio" tabindex="0"></span>
-    <label for="bgPosition2" data-xztext="_顶部"></label>
-    <span data-xztext="_不透明度"></span>&nbsp;
-    <input name="bgOpacity" type="range" />
-    </span>
-    </p>
-    
-    <p class="option" data-no="60">
-      <span class="settingNameStyle1" data-xztext="_颜色主题"></span>
-      <input type="radio" name="theme" id="theme1" class="need_beautify radio" value="auto" checked>
-      <span class="beautify_radio" tabindex="0"></span>
-      <label for="theme1" data-xztext="_自动检测"></label>
-      <input type="radio" name="theme" id="theme2" class="need_beautify radio" value="white">
-      <span class="beautify_radio" tabindex="0"></span>
-      <label for="theme2">White</label>
-      <input type="radio" name="theme" id="theme3" class="need_beautify radio" value="dark">
-      <span class="beautify_radio" tabindex="0"></span>
-      <label for="theme3">Dark</label>
-    </p>
-
-    <p class="option" data-no="32">
-    <span class="settingNameStyle1"><span class="key">Language</span></span>
-    <input type="radio" name="userSetLang" id="userSetLang1" class="need_beautify radio" value="auto" checked>
-    <span class="beautify_radio" tabindex="0"></span>
-    <label for="userSetLang1" data-xztext="_自动检测"></label>
-    <input type="radio" name="userSetLang" id="userSetLang2" class="need_beautify radio" value="zh-cn">
-    <span class="beautify_radio" tabindex="0"></span>
-    <label for="userSetLang2">简体中文</label>
-    <input type="radio" name="userSetLang" id="userSetLang3" class="need_beautify radio" value="zh-tw">
-    <span class="beautify_radio" tabindex="0"></span>
-    <label for="userSetLang3">繁體中文</label>
-    <input type="radio" name="userSetLang" id="userSetLang4" class="need_beautify radio" value="ja">
-    <span class="beautify_radio" tabindex="0"></span>
-    <label for="userSetLang4">日本語</label>
-    <input type="radio" name="userSetLang" id="userSetLang5" class="need_beautify radio" value="en">
-    <span class="beautify_radio" tabindex="0"></span>
-    <label for="userSetLang5">English</label>
-    <input type="radio" name="userSetLang" id="userSetLang6" class="need_beautify radio" value="ko">
-    <span class="beautify_radio" tabindex="0"></span>
-    <label for="userSetLang6">한국어</label>
-    <input type="radio" name="userSetLang" id="userSetLang7" class="need_beautify radio" value="ru">
-    <span class="beautify_radio" tabindex="0"></span>
-    <label for="userSetLang7">Русский</label>
-    </p>
-
-    <p class="option" data-no="37">
-    <span class="settingNameStyle1" data-xztext="_管理设置"></span>
-    <button class="textButton gray1" type="button" id="exportSettings" data-xztext="_导出设置"></button>
-    <button class="textButton gray1" type="button" id="importSettings" data-xztext="_导入设置"></button>
-    <button class="textButton gray1" type="button" id="resetSettings" data-xztext="_重置设置"></button>
-    </p>
-    
-    <p class="option" data-no="51">
-    <span class="has_tip settingNameStyle1" data-xztip="_显示高级设置说明">
-    <span data-xztext="_显示高级设置"></span>
-    <span class="gray1"> ? </span></span>
-    <input type="checkbox" name="showAdvancedSettings" class="need_beautify checkbox_switch">
-    <span class="beautify_switch" tabindex="0"></span>
-    </p>
-
-</form>`;
+// 生成包含所有设置项的 HTML，动态值由模板占位标记替换。
+const createFormHtml = () => _FormHTML_html__WEBPACK_IMPORTED_MODULE_0__
+    .replace(/__fileType\.image__/g, _Config__WEBPACK_IMPORTED_MODULE_1__.Config.fileType.image.join())
+    .replace(/__fileType\.music__/g, _Config__WEBPACK_IMPORTED_MODULE_1__.Config.fileType.music.join())
+    .replace(/__fileType\.video__/g, _Config__WEBPACK_IMPORTED_MODULE_1__.Config.fileType.video.join())
+    .replace(/__fileType\.compressed__/g, _Config__WEBPACK_IMPORTED_MODULE_1__.Config.fileType.compressed.join())
+    .replace(/__fileType\.ps__/g, _Config__WEBPACK_IMPORTED_MODULE_1__.Config.fileType.ps.join())
+    .replace(/__fileType\.other__/g, _Config__WEBPACK_IMPORTED_MODULE_1__.Config.fileType.other.join())
+    .replaceAll(/__defaultNameRule__/g, _Config__WEBPACK_IMPORTED_MODULE_1__.Config.defaultNameRule);
+const formHtml = createFormHtml();
 
 
 /***/ }),
@@ -1937,9 +1452,9 @@ __webpack_require__.r(__webpack_exports__);
 class InitHomePage extends _InitPageBase__WEBPACK_IMPORTED_MODULE_3__.InitPageBase {
     constructor() {
         super();
-        this.crawlFlag = 'supporting';
         this.init();
     }
+    crawlFlag = 'supporting';
     // 添加中间按钮
     addCrawlBtns() {
         if (_PageType__WEBPACK_IMPORTED_MODULE_7__.pageType.type === _PageType__WEBPACK_IMPORTED_MODULE_7__.pageType.list.Home ||
@@ -2000,12 +1515,11 @@ class InitHomePage extends _InitPageBase__WEBPACK_IMPORTED_MODULE_3__.InitPageBa
     }
     /**获取关注的所有用户的所有投稿 */
     async getFollowingPostList() {
-        var _a;
         _Log__WEBPACK_IMPORTED_MODULE_6__.log.log(_Lang__WEBPACK_IMPORTED_MODULE_0__.lang.transl('_抓取关注的所有用户的投稿'));
         // 获取关注的用户列表
         const url = 'https://api.fanbox.cc/creator.listFollowing';
         const json = await _API__WEBPACK_IMPORTED_MODULE_4__.API.request(url);
-        if (((_a = json === null || json === void 0 ? void 0 : json.body) === null || _a === void 0 ? void 0 : _a.creators.length) > 0) {
+        if (json?.body?.creators.length > 0) {
             const userList = json.body.creators.map((item) => {
                 return {
                     creatorId: item.creatorId,
@@ -2127,15 +1641,6 @@ __webpack_require__.r(__webpack_exports__);
 
 
 class InitPageBase {
-    constructor() {
-        this.crawlNumber = 0; // 要抓取的个数/页数
-        this.nextUrl = null;
-        /**并发请求数量 */
-        this.getPostDataThreadMax = 1;
-        this.getPostDataThreadNum = 0;
-        this.getPostDatafinished = 0;
-        this.postListURLs = [];
-    }
     init() {
         this.addCrawlBtns();
         this.addAnyElement();
@@ -2160,6 +1665,13 @@ class InitPageBase {
     addCrawlBtns() { }
     // 添加其他元素（如果有）
     addAnyElement() { }
+    crawlNumber = 0; // 要抓取的个数/页数
+    nextUrl = null;
+    /**并发请求数量 */
+    getPostDataThreadMax = 1;
+    getPostDataThreadNum = 0;
+    getPostDatafinished = 0;
+    postListURLs = [];
     confirmRecrawl() {
         if (_Store__WEBPACK_IMPORTED_MODULE_3__.store.result.length > 0) {
             // 如果已经有抓取结果，则检查这些抓取结果是否已被下载过
@@ -2199,10 +1711,9 @@ class InitPageBase {
     /**获取一个作者的文章列表分页网址 */
     // 获取分页数据，然后构造出每次请求该作者 300 篇文章的 URL
     async getPostListURLs(creatorId) {
-        var _a, _b;
         const paginateData = await _API__WEBPACK_IMPORTED_MODULE_7__.API.request(`https://api.fanbox.cc/post.paginateCreator?creatorId=${creatorId}`);
         // console.log(paginateData.body)
-        if (((_b = (_a = paginateData === null || paginateData === void 0 ? void 0 : paginateData.body) === null || _a === void 0 ? void 0 : _a.pageUrls) === null || _b === void 0 ? void 0 : _b.length) > 0) {
+        if (paginateData?.body?.pageUrls?.length > 0) {
             // 分页数据里的 URL 格式如下：
             // https://api.fanbox.cc/post.listCreator?creatorId=usotukiya&maxPublishedDatetime=2024-08-04%2020%3A41%3A47&maxId=8345112&limit=10
             // 每次可以获取 10 个文章的数据，但是 limit 的最大值是 300，可以一次获取 300 篇文章的数据
@@ -2680,21 +2191,19 @@ __webpack_require__.r(__webpack_exports__);
 // 语言类
 class Lang {
     constructor() {
-        this.langTypes = ['zh-cn', 'zh-tw', 'en', 'ja', 'ko', 'ru'];
-        this.flagIndex = new Map([
-            ['zh-cn', 0],
-            ['zh-tw', 1],
-            ['en', 2],
-            ['ja', 3],
-            ['ko', 4],
-            ['ru', 5],
-        ]);
-        // 保存注册的元素
-        // 在注册的元素里设置特殊的标记，让本模块可以动态更新其文本
-        this.elList = [];
         this.type = this.getHtmlLangType();
         this.bindEvents();
     }
+    type;
+    langTypes = ['zh-cn', 'zh-tw', 'en', 'ja', 'ko', 'ru'];
+    flagIndex = new Map([
+        ['zh-cn', 0],
+        ['zh-tw', 1],
+        ['en', 2],
+        ['ja', 3],
+        ['ko', 4],
+        ['ru', 5],
+    ]);
     bindEvents() {
         window.addEventListener(_EVT__WEBPACK_IMPORTED_MODULE_1__.EVT.list.settingChange, (ev) => {
             const data = ev.detail.data;
@@ -2740,6 +2249,9 @@ class Lang {
         arg.forEach((val) => (content = content.replace('{}', val)));
         return content;
     }
+    // 保存注册的元素
+    // 在注册的元素里设置特殊的标记，让本模块可以动态更新其文本
+    elList = [];
     register(el) {
         this.elList.push(el);
         this.handleMark(el);
@@ -2881,32 +2393,6 @@ __webpack_require__.r(__webpack_exports__);
 // 日志
 class Log {
     constructor() {
-        /**每个日志区域显示多少条日志 */
-        // 如果日志条数超出最大值，下载器会创建多个日志区域
-        this.max = 100;
-        /**最新的日志区域里的日志条数。刷新的日志不会计入 */
-        this.count = 0;
-        this.logWrap = document.createElement('div'); // 日志容器的区域，当日志条数很多时，会产生多个日志容器。默认是隐藏的（display: none）
-        this.activeLogWrapID = 'logWrap'; // 当前活跃的日志容器的 id，也是最新的一个日志容器
-        this.logContent = document.createElement('div'); // 日志的主体区域，始终指向最新的那个日志容器内部
-        this.logContentClassName = 'logContent'; // 日志主体区域的类名
-        this.logWrapClassName = 'logWrap'; // 日志容器的类名，只负责样式
-        this.logWrapFlag = 'logWrapFlag'; // 日志容器的标志，当需要查找日志区域时，使用这个类名而不是 logWrap，因为其他元素可能也具有 logWrap 类名，以应用其样式。
-        /**储存会刷新的日志所使用的元素，可以传入 flag 来区分多个刷新区域 */
-        // 每个刷新区域使用一个 span 元素，里面的文本会变化
-        // 通常用于显示进度，例如 0/10, 1/10, 2/10... 10/10
-        // 如果不传入 flag，那么所有的刷新内容会共用 default 的 span 元素
-        this.refresh = {
-            default: document.createElement('span'),
-        };
-        this.toBottom = false; // 指示是否需要把日志滚动到底部。当有日志被添加或刷新，则为 true。滚动到底部之后复位到 false，避免一直滚动到底部。
-        /**不同日志等级的文字颜色 */
-        this.levelColor = [
-            'inherit',
-            _Colors__WEBPACK_IMPORTED_MODULE_1__.Colors.textSuccess,
-            _Colors__WEBPACK_IMPORTED_MODULE_1__.Colors.textWarning,
-            _Colors__WEBPACK_IMPORTED_MODULE_1__.Colors.textError,
-        ];
         // 因为日志区域限制了最大高度，可能会出现滚动条
         // 所以使用定时器，使日志总是滚动到底部
         window.setInterval(() => {
@@ -2919,6 +2405,32 @@ class Log {
             this.removeAll();
         });
     }
+    /**每个日志区域显示多少条日志 */
+    // 如果日志条数超出最大值，下载器会创建多个日志区域
+    max = 100;
+    /**最新的日志区域里的日志条数。刷新的日志不会计入 */
+    count = 0;
+    logWrap = document.createElement('div'); // 日志容器的区域，当日志条数很多时，会产生多个日志容器。默认是隐藏的（display: none）
+    activeLogWrapID = 'logWrap'; // 当前活跃的日志容器的 id，也是最新的一个日志容器
+    logContent = document.createElement('div'); // 日志的主体区域，始终指向最新的那个日志容器内部
+    logContentClassName = 'logContent'; // 日志主体区域的类名
+    logWrapClassName = 'logWrap'; // 日志容器的类名，只负责样式
+    logWrapFlag = 'logWrapFlag'; // 日志容器的标志，当需要查找日志区域时，使用这个类名而不是 logWrap，因为其他元素可能也具有 logWrap 类名，以应用其样式。
+    /**储存会刷新的日志所使用的元素，可以传入 flag 来区分多个刷新区域 */
+    // 每个刷新区域使用一个 span 元素，里面的文本会变化
+    // 通常用于显示进度，例如 0/10, 1/10, 2/10... 10/10
+    // 如果不传入 flag，那么所有的刷新内容会共用 default 的 span 元素
+    refresh = {
+        default: document.createElement('span'),
+    };
+    toBottom = false; // 指示是否需要把日志滚动到底部。当有日志被添加或刷新，则为 true。滚动到底部之后复位到 false，避免一直滚动到底部。
+    /**不同日志等级的文字颜色 */
+    levelColor = [
+        'inherit',
+        _Colors__WEBPACK_IMPORTED_MODULE_1__.Colors.textSuccess,
+        _Colors__WEBPACK_IMPORTED_MODULE_1__.Colors.textWarning,
+        _Colors__WEBPACK_IMPORTED_MODULE_1__.Colors.textError,
+    ];
     // 添加日志
     /*
     str 日志文本
@@ -3055,20 +2567,20 @@ __webpack_require__.r(__webpack_exports__);
 // 简单的消息框
 class MsgBox {
     constructor() {
-        this.typeColor = {
-            success: _Colors__WEBPACK_IMPORTED_MODULE_1__.Colors.textSuccess,
-            warning: _Colors__WEBPACK_IMPORTED_MODULE_1__.Colors.textWarning,
-            error: _Colors__WEBPACK_IMPORTED_MODULE_1__.Colors.textError,
-        };
-        this.onceFlags = [];
         this.bindEvents();
     }
+    typeColor = {
+        success: _Colors__WEBPACK_IMPORTED_MODULE_1__.Colors.textSuccess,
+        warning: _Colors__WEBPACK_IMPORTED_MODULE_1__.Colors.textWarning,
+        error: _Colors__WEBPACK_IMPORTED_MODULE_1__.Colors.textError,
+    };
     bindEvents() {
         window.addEventListener(_EVT__WEBPACK_IMPORTED_MODULE_0__.EVT.list.showMsg, (ev) => {
             const msg = ev.detail.data;
             this.create(msg);
         });
     }
+    onceFlags = [];
     /** 在当前标签页中只会显示一次的消息。
      *
      * 如果要再次显示该消息，需要先手动调用 resetOnce() 方法清除该标记，然后再次显示消息
@@ -3171,11 +2683,11 @@ __webpack_require__.r(__webpack_exports__);
 // 页面右侧的按钮，点击可以打开中间面板
 class OpenCenterPanel {
     constructor() {
-        this.btn = document.createElement('button');
         this.addBtn();
         this.show();
         this.bindEvents();
     }
+    btn = document.createElement('button');
     addBtn() {
         this.btn = document.createElement('button');
         this.btn.classList.add('rightButton');
@@ -3244,6 +2756,11 @@ class OutputPanel {
         _Lang__WEBPACK_IMPORTED_MODULE_1__.lang.register(this.outputPanel);
         this.bindEvents();
     }
+    outputPanel; // 输出面板
+    outputTitle; // 标题容器
+    outputContent; // 内容容器
+    copyBtn;
+    closeBtn;
     bindEvents() {
         this.closeBtn.addEventListener('click', () => {
             this.close();
@@ -3355,15 +2872,15 @@ var PageName;
 })(PageName || (PageName = {}));
 class PageType {
     constructor() {
-        this.type = 0;
-        // 所有页面类型
-        this.list = PageName;
         this.type = this.getType();
         // 页面切换时检查新旧页面是否不同
         window.addEventListener(_EVT__WEBPACK_IMPORTED_MODULE_0__.EVT.list.pageSwitch, () => {
             this.checkTypeChange();
         });
     }
+    type = 0;
+    // 所有页面类型
+    list = PageName;
     getType() {
         const host = window.location.hostname;
         const path = window.location.pathname;
@@ -3461,7 +2978,20 @@ __webpack_require__.r(__webpack_exports__);
 
 class ProgressBar {
     constructor() {
-        this.wrapHTML = `
+        this.wrap = _Tools__WEBPACK_IMPORTED_MODULE_1__.Tools.useSlot('progressBar', this.wrapHTML);
+        this.downloadedEl = this.wrap.querySelector('.downloaded');
+        this.progressColorEl = this.wrap.querySelector('.progress1');
+        this.listWrap = this.wrap.querySelector('.progressBarList');
+        this.totalNumberEl = this.wrap.querySelector('.totalNumber');
+        _Lang__WEBPACK_IMPORTED_MODULE_2__.lang.register(this.wrap);
+        this.bindEvents();
+    }
+    bindEvents() {
+        window.addEventListener(_EVT__WEBPACK_IMPORTED_MODULE_3__.EVT.list.crawlStart, () => {
+            this.hide();
+        });
+    }
+    wrapHTML = `
   <div class="progressBarWrap">
   <div class="total">
   <span class="text" data-xztext="_下载进度"></span>
@@ -3480,7 +3010,7 @@ class ProgressBar {
   <ul class="progressBarList"></ul>
   </div>
   `;
-        this.barHTML = `<li class="downloadBar">
+    barHTML = `<li class="downloadBar">
   <div class="progressBar progressBar2">
   <div class="progress progress2"></div>
   </div>
@@ -3488,20 +3018,12 @@ class ProgressBar {
   <span class="fileName"></span>
   </div>
   </li>`;
-        this.allProgressBar = [];
-        this.wrap = _Tools__WEBPACK_IMPORTED_MODULE_1__.Tools.useSlot('progressBar', this.wrapHTML);
-        this.downloadedEl = this.wrap.querySelector('.downloaded');
-        this.progressColorEl = this.wrap.querySelector('.progress1');
-        this.listWrap = this.wrap.querySelector('.progressBarList');
-        this.totalNumberEl = this.wrap.querySelector('.totalNumber');
-        _Lang__WEBPACK_IMPORTED_MODULE_2__.lang.register(this.wrap);
-        this.bindEvents();
-    }
-    bindEvents() {
-        window.addEventListener(_EVT__WEBPACK_IMPORTED_MODULE_3__.EVT.list.crawlStart, () => {
-            this.hide();
-        });
-    }
+    wrap;
+    downloadedEl;
+    progressColorEl;
+    listWrap;
+    totalNumberEl;
+    allProgressBar = [];
     // 重设所有进度
     reset(progressBarNum, downloaded = 0) {
         if (progressBarNum === 0) {
@@ -3574,13 +3096,14 @@ __webpack_require__.r(__webpack_exports__);
 // 快速抓取
 class QuickCrawl {
     constructor() {
-        this.show = true; // 是否显示
-        // 指定在哪些页面类型里启用
-        this.enablePageType = [_PageType__WEBPACK_IMPORTED_MODULE_2__.pageType.list.Post];
         this.addBtn();
         this.setVisible();
         this.bindEvents();
     }
+    btn;
+    show = true; // 是否显示
+    // 指定在哪些页面类型里启用
+    enablePageType = [_PageType__WEBPACK_IMPORTED_MODULE_2__.pageType.list.Post];
     addBtn() {
         // 在右侧添加快速抓取按钮
         this.btn = document.createElement('button');
@@ -3642,10 +3165,6 @@ __webpack_require__.r(__webpack_exports__);
 
 
 class RenderCommentsHtml {
-    constructor() {
-        /** 用户没有自定义头像时显示的默认头像 */
-        this.noImageDataUrl = `data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAKoAAACqBAMAAADPWMmxAAAABGdBTUEAALGPC/xhBQAAAAFzUkdCAK7OHOkAAAAPUExURZ+zx9be5f///7bF1MbS3Ap7yAkAAAOZSURBVGje7ZsNjqwgDMcxeADnwQXeO0ENHkCi9z/T1vIhzoCI675kk5LdqCv85k8pbZlkxesnmvjz7/n295dRH7cqU5nKVKYylalMZSpTmcpUpjKVqUxl6n+m6mmytcHLYtuoi8AmT5kasMs45LoVqLOg1rsnlZUE1KWBqoRvIz1mRfs+cJ06B6obIERRat5QWaqOAwTNHfqMVUUrddj6unFdaa2oz7hcoS6TNqMzQOcG9u7P/s1i8Gk1xro+fbxoM5WpIGGbNPipk2Rn11ng+GUjaKfO93FP+m1Wb1Q36Z3mr3JfG2eYMbzTpHUOPQtUOSMi2ApSrfhGTJu+EU3TxT50ha2DLVOtFlIHe+6WwEGjwuE0dgHRxT7bVePt4H07T30l1Dmlbp+3wemz+pQqnZd1ZeqrqNVqMuBIe+qoVSX78FSrzFNxnrPoFN6ldsUBBsx4rjW/WkEr3ql9tbQzhzzbBU7rp2cdteIPad39Fb1jNa+KVj9ztdvuoJX+DG595kv+SlqPu/FNK6qTdIdtUiLurTJ12+e4o6nvtMSFxTig/BsMAXiLK6P2mEVxwNhqfN1HlBNMcyTco3ZXps6p1ktUXZfq+/QNWoPVxrMcq8A51WWtfkilINDr+mqjYqsWGcEO3eMV0fAw1ZUekLX+feogjKWiSNgHqVDeBE9Q+yepx/LmaWr3aK2tTiLFd/wVSyPDZ5hfRNXGNlGVuRAJNWQ3QZGq60Hbn7j6BuqW66q5AEpHvRLVxY7p9LxJzGzGLFFDlLNnubCYhwtUTac+uXFzh2S9OCZI0aZV7rWJmVabZlZjwlmTwI12lSJhS2yATSQNxA0foGEHzP4ZQWm+EilWGbvOD24AQikVnOwCSIVJguCFRMr4QuQOzic7FpwcmTfBbu+2XDB8ouDDALJQNZa/zYkqad6S5IHzUJAn32OcR0LYV/qkjY1UdbSgPDiFX0ApWqO29nMWUhyNkbauORcMbyuVSI3rZpupWrz5pkiNIUu7tZa3Zi8sGEAGH4hwe4OqC44fLdDfyrFz9KzUx0guebC9l7n9rKNCOHjAdLMeUKXZy/NvPCtVxpy4feT7XWvv1y6J378ZYPxGRaSzFpCVpF6ts/RHOKDf6ZvVm/bzhuANUIVeqgk/922tArtUaS5Hs9arxYv162LiQl2pQK9XxSvWLOt66XjPpw2mMpWpTGUqU5nKVKYylalMff26/4v7CerrJ9oXNlXWuxTC6UcAAAAASUVORK5CYII=`;
-    }
     async render(data) {
         if (!_setting_Settings__WEBPACK_IMPORTED_MODULE_1__.settings.saveComment ||
             !data.commentList ||
@@ -3679,7 +3198,7 @@ class RenderCommentsHtml {
     buildCommentTree(comments) {
         const map = new Map();
         for (const comment of this.flattenComments(comments)) {
-            map.set(comment.id, Object.assign(Object.assign({}, comment), { replies: [] }));
+            map.set(comment.id, { ...comment, replies: [] });
         }
         const roots = [];
         for (const comment of map.values()) {
@@ -3722,7 +3241,7 @@ class RenderCommentsHtml {
                 reader.readAsDataURL(blob);
             });
         }
-        catch (_a) {
+        catch {
             // 头像抓取失败时返回 null，渲染时回退到原网址
             return null;
         }
@@ -3732,7 +3251,7 @@ class RenderCommentsHtml {
         let avatarUrl = comment.user
             ? avatarMap.get(comment.user.iconUrl) || comment.user.iconUrl
             : '';
-        avatarUrl || (avatarUrl = this.noImageDataUrl);
+        avatarUrl ||= this.noImageDataUrl;
         const meta = `${_Tools__WEBPACK_IMPORTED_MODULE_2__.Tools.escapeHtml(user)} · ${_utils_DateFormat__WEBPACK_IMPORTED_MODULE_3__.DateFormat.format(comment.createdDatetime, 'YYYY-MM-DD hh:mm:ss')}`;
         const avatar = avatarUrl
             ? `<img class="comment-icon" src="${_Tools__WEBPACK_IMPORTED_MODULE_2__.Tools.escapeHtml(avatarUrl)}" alt="" loading="lazy">`
@@ -3743,6 +3262,8 @@ class RenderCommentsHtml {
             .join('\n');
         return `<div class="comment">${avatar}<div class="comment-main"><p class="comment-meta">${meta}</p><div class="comment-body">${body}</div>${replies ? `<div class="comment-replies">${replies}</div>` : ''}</div></div>`;
     }
+    /** 用户没有自定义头像时显示的默认头像 */
+    noImageDataUrl = `data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAKoAAACqBAMAAADPWMmxAAAABGdBTUEAALGPC/xhBQAAAAFzUkdCAK7OHOkAAAAPUExURZ+zx9be5f///7bF1MbS3Ap7yAkAAAOZSURBVGje7ZsNjqwgDMcxeADnwQXeO0ENHkCi9z/T1vIhzoCI675kk5LdqCv85k8pbZlkxesnmvjz7/n295dRH7cqU5nKVKYylalMZSpTmcpUpjKVqUxl6n+m6mmytcHLYtuoi8AmT5kasMs45LoVqLOg1rsnlZUE1KWBqoRvIz1mRfs+cJ06B6obIERRat5QWaqOAwTNHfqMVUUrddj6unFdaa2oz7hcoS6TNqMzQOcG9u7P/s1i8Gk1xro+fbxoM5WpIGGbNPipk2Rn11ng+GUjaKfO93FP+m1Wb1Q36Z3mr3JfG2eYMbzTpHUOPQtUOSMi2ApSrfhGTJu+EU3TxT50ha2DLVOtFlIHe+6WwEGjwuE0dgHRxT7bVePt4H07T30l1Dmlbp+3wemz+pQqnZd1ZeqrqNVqMuBIe+qoVSX78FSrzFNxnrPoFN6ldsUBBsx4rjW/WkEr3ql9tbQzhzzbBU7rp2cdteIPad39Fb1jNa+KVj9ztdvuoJX+DG595kv+SlqPu/FNK6qTdIdtUiLurTJ12+e4o6nvtMSFxTig/BsMAXiLK6P2mEVxwNhqfN1HlBNMcyTco3ZXps6p1ktUXZfq+/QNWoPVxrMcq8A51WWtfkilINDr+mqjYqsWGcEO3eMV0fAw1ZUekLX+feogjKWiSNgHqVDeBE9Q+yepx/LmaWr3aK2tTiLFd/wVSyPDZ5hfRNXGNlGVuRAJNWQ3QZGq60Hbn7j6BuqW66q5AEpHvRLVxY7p9LxJzGzGLFFDlLNnubCYhwtUTac+uXFzh2S9OCZI0aZV7rWJmVabZlZjwlmTwI12lSJhS2yATSQNxA0foGEHzP4ZQWm+EilWGbvOD24AQikVnOwCSIVJguCFRMr4QuQOzic7FpwcmTfBbu+2XDB8ouDDALJQNZa/zYkqad6S5IHzUJAn32OcR0LYV/qkjY1UdbSgPDiFX0ApWqO29nMWUhyNkbauORcMbyuVSI3rZpupWrz5pkiNIUu7tZa3Zi8sGEAGH4hwe4OqC44fLdDfyrFz9KzUx0guebC9l7n9rKNCOHjAdLMeUKXZy/NvPCtVxpy4feT7XWvv1y6J378ZYPxGRaSzFpCVpF6ts/RHOKDf6ZvVm/bzhuANUIVeqgk/922tArtUaS5Hs9arxYv162LiQl2pQK9XxSvWLOt66XjPpw2mMpWpTGUqU5nKVKYylalMff26/4v7CerrJ9oXNlXWuxTC6UcAAAAASUVORK5CYII=`;
 }
 const renderCommentsHtml = new RenderCommentsHtml();
 
@@ -3763,17 +3284,15 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var _Lang__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./Lang */ "./src/ts/Lang.ts");
 /* harmony import */ var _setting_Settings__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./setting/Settings */ "./src/ts/setting/Settings.ts");
 /* harmony import */ var _utils_DateFormat__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./utils/DateFormat */ "./src/ts/utils/DateFormat.ts");
+/* harmony import */ var _Tools__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ./Tools */ "./src/ts/Tools.ts");
+
 
 
 
 class RenderCommentsText {
-    constructor() {
-        this.extractTextReg = new RegExp(/<[^<>]+>/g);
-    }
+    extractTextReg = new RegExp(/<[^<>]+>/g);
     // 把评论转换为纯文本，添加到文本内容里
-    // HTML 格式时，评论会通过 RenderCommentsHtml 渲染进 HTML 文档，这里不需要重复添加
     render(result, data) {
-        var _a;
         if (!_setting_Settings__WEBPACK_IMPORTED_MODULE_1__.settings.saveComment) {
             return;
         }
@@ -3797,7 +3316,7 @@ class RenderCommentsText {
         const commentsSeparator = `${_Lang__WEBPACK_IMPORTED_MODULE_0__.lang.transl('_评论')}\r\n---\r\n`;
         result.textContent.text.push(commentsSeparator);
         result.textContent.text = result.textContent.text.concat(commentLines);
-        (_a = result.textContent).fileID || (_a.fileID = this.createFileId());
+        result.textContent.fileID ||= _Tools__WEBPACK_IMPORTED_MODULE_3__.Tools.createFileId();
     }
     // 把评论数据转换为纯文本的多行文本
     getCommentLines(comments) {
@@ -3850,7 +3369,7 @@ class RenderCommentsText {
     buildCommentTree(comments) {
         const map = new Map();
         for (const comment of this.flattenComments(comments)) {
-            map.set(comment.id, Object.assign(Object.assign({}, comment), { replies: [] }));
+            map.set(comment.id, { ...comment, replies: [] });
         }
         const roots = [];
         for (const comment of map.values()) {
@@ -3862,12 +3381,6 @@ class RenderCommentsText {
             }
         }
         return roots;
-    }
-    // 下载器自己生成的 txt 文件没有 id，所以这里需要自己给它生成一个 id
-    // 使用时间戳并不保险，因为有时候代码执行太快，会生成重复的时间戳。所以后面加上随机字符
-    createFileId() {
-        return (new Date().getTime().toString() +
-            Math.random().toString(16).replace('.', ''));
     }
 }
 const renderCommentsText = new RenderCommentsText();
@@ -3903,16 +3416,12 @@ __webpack_require__.r(__webpack_exports__);
 
 
 class SaveData {
-    constructor() {
-        this.extractTextReg = new RegExp(/<[^<>]+>/g);
-    }
+    extractTextReg = new RegExp(/<[^<>]+>/g);
     receive(data) {
         // console.log(data)
         this.parsePost(data);
     }
     parsePost(data) {
-        var _a;
-        var _b;
         // 针对投稿进行检查，决定是否保留它
         const id = data.id;
         const creatorId = data.creatorId;
@@ -3956,11 +3465,11 @@ class SaveData {
         // 封面图片的序号设置为 0，所以它里面不需要对 index 进行操作
         if (_setting_Settings__WEBPACK_IMPORTED_MODULE_2__.settings.savePostCover) {
             // 移除这部分路径，得到的就是缩略图的原图链接
-            const cover = (_a = data.coverImageUrl) === null || _a === void 0 ? void 0 : _a.replace('/c/1200x630_90_a2_g5', '');
+            const cover = data.coverImageUrl?.replace('/c/1200x630_90_a2_g5', '');
             if (cover) {
                 const { name, ext } = this.getUrlNameAndExt(cover);
                 const r = {
-                    fileID: this.createFileId(),
+                    fileID: _Tools__WEBPACK_IMPORTED_MODULE_6__.Tools.createFileId(),
                     name,
                     ext,
                     size: null,
@@ -3998,7 +3507,7 @@ class SaveData {
             if (text) {
                 const links = this.getTextLinks(text);
                 result.textContent.text = result.textContent.text.concat(links);
-                result.textContent.fileID = this.createFileId();
+                result.textContent.fileID = _Tools__WEBPACK_IMPORTED_MODULE_6__.Tools.createFileId();
                 // 保存文章正文里的文字
                 if (_setting_Settings__WEBPACK_IMPORTED_MODULE_2__.settings.saveText) {
                     result.textContent.text.push(text);
@@ -4040,7 +3549,7 @@ class SaveData {
             for (const link of linkTexts) {
                 const links = this.getTextLinks(link);
                 result.textContent.text = result.textContent.text.concat(links);
-                result.textContent.fileID = this.createFileId();
+                result.textContent.fileID = _Tools__WEBPACK_IMPORTED_MODULE_6__.Tools.createFileId();
             }
             // 如果有链接，则添加一个空字符串，使其占据一行
             // 这样可以让链接和下面的正文部分之间有一个空行
@@ -4081,7 +3590,7 @@ class SaveData {
             }
             const embedLinks = this.getEmbedLinks(embedDataArr, data.id);
             result.textContent.text = result.textContent.text.concat(embedLinks);
-            result.textContent.fileID = this.createFileId();
+            result.textContent.fileID = _Tools__WEBPACK_IMPORTED_MODULE_6__.Tools.createFileId();
             // 保存嵌入的 URL，只能保存到文本
             if (_setting_Settings__WEBPACK_IMPORTED_MODULE_2__.settings.saveLink) {
                 const urlArr = [];
@@ -4112,7 +3621,7 @@ class SaveData {
                 }
                 if (urlArr.length > 0) {
                     result.textContent.text = result.textContent.text.concat(urlArr.join('\n\n'));
-                    result.textContent.fileID = this.createFileId();
+                    result.textContent.fileID = _Tools__WEBPACK_IMPORTED_MODULE_6__.Tools.createFileId();
                 }
             }
         }
@@ -4186,7 +3695,7 @@ class SaveData {
             ];
             const embedLinks = this.getEmbedLinks(embedDataArr, data.id);
             result.textContent.text = result.textContent.text.concat(embedLinks);
-            result.textContent.fileID = this.createFileId();
+            result.textContent.fileID = _Tools__WEBPACK_IMPORTED_MODULE_6__.Tools.createFileId();
         }
         // 保存投稿中的评论
         // 评论不依赖投稿正文，正文之外的信息（链接等）可能包含在评论里
@@ -4194,7 +3703,7 @@ class SaveData {
         if (_setting_Settings__WEBPACK_IMPORTED_MODULE_2__.settings.saveText && _setting_Settings__WEBPACK_IMPORTED_MODULE_2__.settings.textFormat === 'html') {
             result.textContent.ext = 'html';
             result.textContent.htmlData = data;
-            (_b = result.textContent).fileID || (_b.fileID = this.createFileId());
+            result.textContent.fileID ||= _Tools__WEBPACK_IMPORTED_MODULE_6__.Tools.createFileId();
         }
         // 检查文本里是否含有网址
         let findURL = result.textContent.text.some((text) => /https?:\/\//.test(text));
@@ -4274,12 +3783,6 @@ class SaveData {
             links.push(_Tools__WEBPACK_IMPORTED_MODULE_6__.Tools.getEmbedUrl(serviceProvider, contentId));
         }
         return links;
-    }
-    // 下载器自己生成的 txt 文件没有 id，所以这里需要自己给它生成一个 id
-    // 使用时间戳并不保险，因为有时候代码执行太快，会生成重复的时间戳。所以后面加上随机字符
-    createFileId() {
-        return (new Date().getTime().toString() +
-            Math.random().toString(16).replace('.', ''));
     }
     // 传入文件 url，提取文件名和扩展名
     getUrlNameAndExt(url) {
@@ -4362,10 +3865,10 @@ __webpack_require__.r(__webpack_exports__);
 
 class ShowNotification {
     constructor() {
-        this.iconURL = '';
         this.iconURL = chrome.runtime.getURL('icon/logo128.png');
         this.bindEvents();
     }
+    iconURL = '';
     bindEvents() {
         // 当用户开启“下载完成后显示通知”的提示时，请求权限
         window.addEventListener(_EVT__WEBPACK_IMPORTED_MODULE_0__.EVT.list.settingChange, (ev) => {
@@ -4426,8 +3929,6 @@ __webpack_require__.r(__webpack_exports__);
 // 显示版本更新说明
 class ShowWhatIsNew {
     constructor() {
-        this.flag = '4.9.4';
-        this.textKey = '_更新说明4_9_3';
         // 在 settingInitialized 事件触发后显示消息。如果时间较早，文本可能会被翻译成错误的语言
         window.addEventListener(_EVT__WEBPACK_IMPORTED_MODULE_3__.EVT.list.settingInitialized, () => {
             this.show();
@@ -4437,6 +3938,8 @@ class ShowWhatIsNew {
             this.showMsg();
         });
     }
+    flag = '5.0.0';
+    textKey = '_更新说明5_0_0';
     show() {
         // 如果这个标记是初始值，说明用户是首次安装这个扩展，或者重置了设置，此时不显示更新说明
         // 这样做的目的：只有当用户是从以前的版本升级到新版本时，才会显示更新说明
@@ -4458,7 +3961,6 @@ class ShowWhatIsNew {
       <br>
       <br>
       <div>${_Lang__WEBPACK_IMPORTED_MODULE_0__.lang.transl(this.textKey)}</div>
-      <br>
       <br>
       ${_Lang__WEBPACK_IMPORTED_MODULE_0__.lang.transl('_赞助方式提示')}`;
         _MsgBox__WEBPACK_IMPORTED_MODULE_2__.msgBox.show(msg, {
@@ -4489,27 +3991,27 @@ __webpack_require__.r(__webpack_exports__);
 // 状态的值通常只由单一的模块修改
 class States {
     constructor() {
-        /**指示 settings 是否初始化完毕 */
-        this.settingInitialized = false;
-        /**表示下载器是否处于繁忙状态
-         *
-         * 繁忙：下载器正在抓取作品，或者正在下载文件
-         */
-        this.busy = false;
-        /**快速下载标记
-         *
-         * 快速下载模式中不会显示下载面板，并且总是会自动开始下载
-         *
-         * 启动快速下载时设为 true，下载完成或中止时复位到 false
-         */
-        this.quickCrawl = false;
-        /**是否处于下载中 */
-        this.downloading = false;
-        // 保存每次抓取完成和下载完成的时间戳，用来判断这次抓取结果是否已被下载完毕
-        this.crawlCompleteTime = 1;
-        this.downloadCompleteTime = 0;
         this.bindEvents();
     }
+    /**指示 settings 是否初始化完毕 */
+    settingInitialized = false;
+    /**表示下载器是否处于繁忙状态
+     *
+     * 繁忙：下载器正在抓取作品，或者正在下载文件
+     */
+    busy = false;
+    /**快速下载标记
+     *
+     * 快速下载模式中不会显示下载面板，并且总是会自动开始下载
+     *
+     * 启动快速下载时设为 true，下载完成或中止时复位到 false
+     */
+    quickCrawl = false;
+    /**是否处于下载中 */
+    downloading = false;
+    // 保存每次抓取完成和下载完成的时间戳，用来判断这次抓取结果是否已被下载完毕
+    crawlCompleteTime = 1;
+    downloadCompleteTime = 0;
     bindEvents() {
         window.addEventListener(_EVT__WEBPACK_IMPORTED_MODULE_0__.EVT.list.settingInitialized, () => {
             this.settingInitialized = true;
@@ -4579,17 +4081,17 @@ __webpack_require__.r(__webpack_exports__);
 // 存储抓取结果和状态
 class Store {
     constructor() {
-        this.postIdList = [];
-        /**抓取结果的元数据 */
-        this.resultMeta = [];
-        /**抓取结果 */
-        this.result = [];
-        /**抓取完成的时间 */
-        this.date = new Date();
-        /**因为价格限制而不能抓取的文章 */
-        this.skipDueToFee = 0;
         this.bindEvents();
     }
+    postIdList = [];
+    /**抓取结果的元数据 */
+    resultMeta = [];
+    /**抓取结果 */
+    result = [];
+    /**抓取完成的时间 */
+    date = new Date();
+    /**因为价格限制而不能抓取的文章 */
+    skipDueToFee = 0;
     bindEvents() {
         window.addEventListener(_EVT__WEBPACK_IMPORTED_MODULE_0__.EVT.list.crawlStart, () => {
             this.resetResult();
@@ -4655,28 +4157,28 @@ __webpack_require__.r(__webpack_exports__);
 // 下载器的主题默认跟随页面主题。如果用户设置了下载器主题，则不再跟随页面主题
 class Theme {
     constructor() {
-        this.allTheme = ['white', 'dark'];
-        this.defaultTheme = 'white'; // 默认主题
-        this.theme = 'white'; // 保存当前使用的主题
-        this.settingTheme = ''; // 保存用户设置的下载器主题
-        this.elList = []; // 保存已注册的元素
-        // 主题标记以及对应的 className
-        // 把需要响应主题变化的元素注册到这个组件里，元素会被添加当前主题的 className
-        this.classNameMap = new Map([
-            ['white', 'theme-white'],
-            ['dark', 'theme-dark'],
-        ]);
-        // 页面上储存的主题标记，与本组件里的主题的对应关系
-        this.htmlFlagMap = new Map([
-            ['', 'white'],
-            ['default', 'white'],
-            ['light', 'white'],
-            ['dark', 'dark'],
-        ]);
-        this.selector = 'html'; // 通过这个选择器查找含有主题标记的元素
-        this.timer = 0;
         this.bindEvents();
     }
+    allTheme = ['white', 'dark'];
+    defaultTheme = 'white'; // 默认主题
+    theme = 'white'; // 保存当前使用的主题
+    settingTheme = ''; // 保存用户设置的下载器主题
+    elList = []; // 保存已注册的元素
+    // 主题标记以及对应的 className
+    // 把需要响应主题变化的元素注册到这个组件里，元素会被添加当前主题的 className
+    classNameMap = new Map([
+        ['white', 'theme-white'],
+        ['dark', 'theme-dark'],
+    ]);
+    // 页面上储存的主题标记，与本组件里的主题的对应关系
+    htmlFlagMap = new Map([
+        ['', 'white'],
+        ['default', 'white'],
+        ['light', 'white'],
+        ['dark', 'dark'],
+    ]);
+    selector = 'html'; // 通过这个选择器查找含有主题标记的元素
+    timer = 0;
     bindEvents() {
         // 主题设置变化时修改主题
         window.addEventListener(_EVT__WEBPACK_IMPORTED_MODULE_1__.EVT.list.settingChange, (ev) => {
@@ -4777,9 +4279,9 @@ const theme = new Theme();
 // 显示自定义的提示
 class Tip {
     constructor() {
-        this.tipEl = document.createElement('div'); // tip 元素
         this.addTipEl();
     }
+    tipEl = document.createElement('div'); // tip 元素
     // 显示提示
     addTipEl() {
         const tipHTML = `<div id="tip"></div>`;
@@ -4840,49 +4342,49 @@ __webpack_require__.r(__webpack_exports__);
 // 适用于无需用户进行确认的提示
 class Toast {
     constructor() {
-        this.defaultCfg = {
-            msg: '',
-            color: _Colors__WEBPACK_IMPORTED_MODULE_0__.Colors.white,
-            bgColor: _Colors__WEBPACK_IMPORTED_MODULE_0__.Colors.bgBrightBlue,
-            dealy: 1500,
-            enter: 'up',
-            leave: 'fade',
-            position: 'mouse',
-        };
-        this.successCfg = {
-            msg: '',
-            color: _Colors__WEBPACK_IMPORTED_MODULE_0__.Colors.white,
-            bgColor: _Colors__WEBPACK_IMPORTED_MODULE_0__.Colors.bgSuccess,
-            dealy: 1500,
-            enter: 'up',
-            leave: 'fade',
-            position: 'mouse',
-        };
-        this.warningCfg = {
-            msg: '',
-            color: _Colors__WEBPACK_IMPORTED_MODULE_0__.Colors.white,
-            bgColor: _Colors__WEBPACK_IMPORTED_MODULE_0__.Colors.bgWarning,
-            dealy: 1500,
-            enter: 'up',
-            leave: 'fade',
-            position: 'mouse',
-        };
-        this.errorCfg = {
-            msg: '',
-            color: _Colors__WEBPACK_IMPORTED_MODULE_0__.Colors.white,
-            bgColor: _Colors__WEBPACK_IMPORTED_MODULE_0__.Colors.bgError,
-            dealy: 1500,
-            enter: 'up',
-            leave: 'fade',
-            position: 'mouse',
-        };
-        this.tipClassName = 'xzToast';
-        this.mousePosition = { x: 0, y: 0 };
-        this.minTop = 20;
-        this.once = 1; // 每一帧移动多少像素
-        this.total = 20; // 移动多少像素后消失
         this.bindEvents();
     }
+    defaultCfg = {
+        msg: '',
+        color: _Colors__WEBPACK_IMPORTED_MODULE_0__.Colors.white,
+        bgColor: _Colors__WEBPACK_IMPORTED_MODULE_0__.Colors.bgBrightBlue,
+        dealy: 1500,
+        enter: 'up',
+        leave: 'fade',
+        position: 'mouse',
+    };
+    successCfg = {
+        msg: '',
+        color: _Colors__WEBPACK_IMPORTED_MODULE_0__.Colors.white,
+        bgColor: _Colors__WEBPACK_IMPORTED_MODULE_0__.Colors.bgSuccess,
+        dealy: 1500,
+        enter: 'up',
+        leave: 'fade',
+        position: 'mouse',
+    };
+    warningCfg = {
+        msg: '',
+        color: _Colors__WEBPACK_IMPORTED_MODULE_0__.Colors.white,
+        bgColor: _Colors__WEBPACK_IMPORTED_MODULE_0__.Colors.bgWarning,
+        dealy: 1500,
+        enter: 'up',
+        leave: 'fade',
+        position: 'mouse',
+    };
+    errorCfg = {
+        msg: '',
+        color: _Colors__WEBPACK_IMPORTED_MODULE_0__.Colors.white,
+        bgColor: _Colors__WEBPACK_IMPORTED_MODULE_0__.Colors.bgError,
+        dealy: 1500,
+        enter: 'up',
+        leave: 'fade',
+        position: 'mouse',
+    };
+    tipClassName = 'xzToast';
+    mousePosition = { x: 0, y: 0 };
+    minTop = 20;
+    once = 1; // 每一帧移动多少像素
+    total = 20; // 移动多少像素后消失
     bindEvents() {
         // 必须是监听 mousemove 而不是 click
         window.addEventListener('mousemove', (ev) => {
@@ -5107,6 +4609,16 @@ class Tools {
         }
         return result;
     }
+    // 嵌入的文件只支持指定的网站，每个网站有固定的前缀
+    static providerDict = {
+        youtube: 'https://www.youtube.com/watch?v=',
+        fanbox: 'https://www.fanbox.cc/',
+        gist: 'https://gist.github.com/',
+        soundcloud: 'https://soundcloud.com/',
+        vimeo: 'https://player.vimeo.com/video/',
+        twitter: 'https://twitter.com/i/web/status/',
+        google_forms: 'https://docs.google.com/forms/d/e/',
+    };
     static getEmbedUrl(serviceProvider, contentId) {
         let url = this.providerDict[serviceProvider] + contentId;
         if (serviceProvider === 'google_forms') {
@@ -5126,17 +4638,13 @@ class Tools {
             return entities[character];
         });
     }
+    // 下载器自己生成的 txt 文件没有 id，所以这里需要自己给它生成一个 id
+    // 使用时间戳并不保险，因为有时候代码执行太快，会生成重复的时间戳。所以后面加上随机字符
+    static createFileId() {
+        return (new Date().getTime().toString() +
+            Math.random().toString(16).replace('.', ''));
+    }
 }
-// 嵌入的文件只支持指定的网站，每个网站有固定的前缀
-Tools.providerDict = {
-    youtube: 'https://www.youtube.com/watch?v=',
-    fanbox: 'https://www.fanbox.cc/',
-    gist: 'https://gist.github.com/',
-    soundcloud: 'https://soundcloud.com/',
-    vimeo: 'https://player.vimeo.com/video/',
-    twitter: 'https://twitter.com/i/web/status/',
-    google_forms: 'https://docs.google.com/forms/d/e/',
-};
 
 
 
@@ -5233,7 +4741,10 @@ class CreateHtmlDocument {
         const postUrl = `https://www.fanbox.cc/@${encodeURIComponent(data.creatorId)}/posts/${encodeURIComponent(data.id)}`;
         const safePostUrl = this.getSafeExternalUrl(postUrl);
         const commonResult = this.getCommonResult(result);
-        const htmlPath = _FileName__WEBPACK_IMPORTED_MODULE_3__.fileName.getFileName(Object.assign(Object.assign({}, commonResult), result.textContent));
+        const htmlPath = _FileName__WEBPACK_IMPORTED_MODULE_3__.fileName.getFileName({
+            ...commonResult,
+            ...result.textContent,
+        });
         let coverHtml = '';
         let body = '';
         const cover = result.files.find((file) => file.index === 0);
@@ -5325,7 +4836,10 @@ class CreateHtmlDocument {
             }
         }
         if (cover) {
-            const coverPath = _FileName__WEBPACK_IMPORTED_MODULE_3__.fileName.getFileName(Object.assign(Object.assign({}, commonResult), cover));
+            const coverPath = _FileName__WEBPACK_IMPORTED_MODULE_3__.fileName.getFileName({
+                ...commonResult,
+                ...cover,
+            });
             const relativeCoverPath = this.getRelativePath(htmlPath, coverPath);
             if (!body.includes(relativeCoverPath)) {
                 coverHtml = this.renderImageSource(relativeCoverPath, cover.name);
@@ -5380,7 +4894,7 @@ class CreateHtmlDocument {
                 ? url.href
                 : null;
         }
-        catch (_a) {
+        catch {
             return null;
         }
     }
@@ -5400,7 +4914,10 @@ class CreateHtmlDocument {
     renderPostImage(image, result, commonResult, htmlPath) {
         const downloadedImage = result.files.find((file) => file.fileID === image.id);
         if (downloadedImage) {
-            const imagePath = _FileName__WEBPACK_IMPORTED_MODULE_3__.fileName.getFileName(Object.assign(Object.assign({}, commonResult), downloadedImage));
+            const imagePath = _FileName__WEBPACK_IMPORTED_MODULE_3__.fileName.getFileName({
+                ...commonResult,
+                ...downloadedImage,
+            });
             return this.renderImageSource(this.getRelativePath(htmlPath, imagePath), image.id);
         }
         return this.renderImage(image[_setting_Settings__WEBPACK_IMPORTED_MODULE_2__.settings.imageSize === 'original' ? 'originalUrl' : 'thumbnailUrl'], image.id);
@@ -5440,7 +4957,10 @@ class CreateHtmlDocument {
     renderPostFile(url, text, extension, fileId, result, commonResult, htmlPath) {
         const downloadedFile = result.files.find((file) => file.fileID === fileId);
         if (downloadedFile) {
-            const filePath = _FileName__WEBPACK_IMPORTED_MODULE_3__.fileName.getFileName(Object.assign(Object.assign({}, commonResult), downloadedFile));
+            const filePath = _FileName__WEBPACK_IMPORTED_MODULE_3__.fileName.getFileName({
+                ...commonResult,
+                ...downloadedFile,
+            });
             const relativeFilePath = this.getRelativePath(htmlPath, filePath);
             // 如果这个文件是图片，则直接显示 img 标签
             if (_Config__WEBPACK_IMPORTED_MODULE_1__.Config.fileType.image.includes(extension.toLowerCase())) {
@@ -5523,7 +5043,6 @@ class CreateHtmlDocument {
             'span',
         ]);
         const sanitizeNode = (node) => {
-            var _a;
             for (const child of [...node.childNodes]) {
                 sanitizeNode(child);
             }
@@ -5550,7 +5069,7 @@ class CreateHtmlDocument {
             if (urlAttribute && node.hasAttribute(urlAttribute)) {
                 const sourceUrls = [node.getAttribute(urlAttribute)];
                 if (tag === 'img' &&
-                    ((_a = node.parentElement) === null || _a === void 0 ? void 0 : _a.tagName.toLowerCase()) === 'a') {
+                    node.parentElement?.tagName.toLowerCase() === 'a') {
                     const href = node.parentElement.getAttribute('href');
                     href && sourceUrls.push(href);
                 }
@@ -5558,7 +5077,10 @@ class CreateHtmlDocument {
                     ? result.files.find((file) => file.fileID === this.getImageFileId(sourceUrls[0]))
                     : undefined;
                 if (downloadedImage) {
-                    const imagePath = _FileName__WEBPACK_IMPORTED_MODULE_3__.fileName.getFileName(Object.assign(Object.assign({}, commonResult), downloadedImage));
+                    const imagePath = _FileName__WEBPACK_IMPORTED_MODULE_3__.fileName.getFileName({
+                        ...commonResult,
+                        ...downloadedImage,
+                    });
                     node.setAttribute('src', this.getRelativePath(htmlPath, imagePath));
                 }
                 else {
@@ -5592,7 +5114,7 @@ class CreateHtmlDocument {
             const fileName = pathname.split('/').pop() || '';
             return fileName.split('.')[0];
         }
-        catch (_a) {
+        catch {
             return '';
         }
     }
@@ -5632,12 +5154,14 @@ __webpack_require__.r(__webpack_exports__);
 
 class Download {
     constructor(progressBarIndex, data) {
-        this.fileName = '';
         this.progressBarIndex = progressBarIndex;
         this.arg = data;
         this.download(data);
         this.bindEvents();
     }
+    progressBarIndex;
+    arg;
+    fileName = '';
     bindEvents() {
         window.addEventListener(_EVT__WEBPACK_IMPORTED_MODULE_0__.EVT.list.downloadSuccess, (event) => {
             const donwloadSuccessData = event.detail.data;
@@ -5745,20 +5269,20 @@ __webpack_require__.r(__webpack_exports__);
 
 class DownloadControl {
     constructor() {
-        this.downloadThread = 2; // 同时下载的线程数
-        this.taskBatch = 0; // 标记任务批次，每次重新下载时改变它的值，传递给后台使其知道这是一次新的下载
-        this.taskList = {}; // 下载任务列表，使用下载的文件的 id 做 key，保存下载栏编号和它在下载状态列表中的索引
-        this.downloaded = 0; // 已下载的任务数量
-        this.reTryTimer = 0; // 重试下载的定时器
-        this.wrapper = document.createElement('div');
-        this.downStatusEl = document.createElement('span');
-        this.stop = false; // 是否停止下载
-        this.pause = false; // 是否暂停下载
         this.createDownloadArea();
         this.bindEvents();
         const skipTipWrap = this.wrapper.querySelector('.skip_tip');
         new _ShowSkipCount__WEBPACK_IMPORTED_MODULE_10__.ShowSkipCount(skipTipWrap);
     }
+    downloadThread = 2; // 同时下载的线程数
+    taskBatch = 0; // 标记任务批次，每次重新下载时改变它的值，传递给后台使其知道这是一次新的下载
+    taskList = {}; // 下载任务列表，使用下载的文件的 id 做 key，保存下载栏编号和它在下载状态列表中的索引
+    downloaded = 0; // 已下载的任务数量
+    reTryTimer = 0; // 重试下载的定时器
+    wrapper = document.createElement('div');
+    downStatusEl = document.createElement('span');
+    stop = false; // 是否停止下载
+    pause = false; // 是否暂停下载
     bindEvents() {
         window.addEventListener(_EVT__WEBPACK_IMPORTED_MODULE_0__.EVT.list.crawlStart, () => {
             this.hideDownloadArea();
@@ -5781,13 +5305,12 @@ class DownloadControl {
         });
         // 监听浏览器下载文件后，返回的消息
         chrome.runtime.onMessage.addListener((msg) => {
-            var _a;
             if (!this.taskBatch) {
                 return;
             }
             // 丢失文件名的情况。对于下载器动态创建的 Blob URL，文件名会是 UUID
             // 对于 Fanbox 原有的 URL，文件名会是 URL 最后一段路径（浏览器会把这段作为默认的文件名）
-            if ((_a = msg.data) === null || _a === void 0 ? void 0 : _a.uuid) {
+            if (msg.data?.uuid) {
                 _Log__WEBPACK_IMPORTED_MODULE_3__.log.log(_Lang__WEBPACK_IMPORTED_MODULE_4__.lang.transl('_uuid'), 1, false, 'filenameUUID');
                 _MsgBox__WEBPACK_IMPORTED_MODULE_11__.msgBox.once('uuidTip', _Lang__WEBPACK_IMPORTED_MODULE_4__.lang.transl('_uuid'), 'show');
                 this.pauseDownload();
@@ -6148,9 +5671,7 @@ class DownloadControl {
                 progressBarIndex: progressBarIndex,
                 taskBatch: this.taskBatch,
                 // 仅 HTML 文本需要覆盖，避免附件和图片被同名文件覆盖
-                conflictAction: 'text' in result && result.ext === 'html'
-                    ? 'overwrite'
-                    : undefined,
+                conflictAction: 'text' in result && result.ext === 'html' ? 'overwrite' : undefined,
             };
             // 保存任务信息
             this.taskList[data.data.fileID] = {
@@ -6187,12 +5708,12 @@ __webpack_require__.r(__webpack_exports__);
 
 class DownloadInterval {
     constructor() {
-        /**允许开始下载的时间戳 */
-        // 不管设置里的值是多少，初始值都是 0，即允许第一次下载立即开始
-        // 在开始下载第一个文件后，才会有实际的值
-        this.allowDownloadTime = 0;
         this.bindEvents();
     }
+    /**允许开始下载的时间戳 */
+    // 不管设置里的值是多少，初始值都是 0，即允许第一次下载立即开始
+    // 在开始下载第一个文件后，才会有实际的值
+    allowDownloadTime = 0;
     bindEvents() {
         window.addEventListener(_EVT__WEBPACK_IMPORTED_MODULE_0__.EVT.list.settingChange, (ev) => {
             const data = ev.detail.data;
@@ -6290,12 +5811,13 @@ __webpack_require__.r(__webpack_exports__);
 // 保存下载记录，用来判断重复下载的文件
 class DownloadRecord {
     constructor() {
-        this.DBName = 'DLRecord';
-        this.DBVer = 1;
-        this.storeName = 'record';
         this.IDB = new _utils_IndexedDB__WEBPACK_IMPORTED_MODULE_4__.IndexedDB();
         this.init();
     }
+    IDB;
+    DBName = 'DLRecord';
+    DBVer = 1;
+    storeName = 'record';
     async init() {
         await this.initDB();
         this.bindEvents();
@@ -6453,9 +5975,9 @@ __webpack_require__.r(__webpack_exports__);
 // 下载状态列表
 class DownloadStates {
     constructor() {
-        this.states = [];
         this.bindEvents();
     }
+    states = [];
     bindEvents() {
         // 初始化下载状态
         window.addEventListener(_EVT__WEBPACK_IMPORTED_MODULE_0__.EVT.list.crawlFinish, () => {
@@ -6548,7 +6070,7 @@ class GetTotalDownload {
                 msg: 'getTotalDownload',
             }, (response) => {
                 // response: { total: number }
-                const total = (response === null || response === void 0 ? void 0 : response.total) || -1;
+                const total = response?.total || -1;
                 return resolve(total);
             });
         });
@@ -6622,15 +6144,19 @@ __webpack_require__.r(__webpack_exports__);
 // 断点续传。恢复未完成的下载
 class Resume {
     constructor() {
-        this.DBName = 'PFD';
-        this.DBVer = 1;
-        this.dataName = 'taskData'; // 下载任务数据的表名
-        this.statesName = 'taskStates'; // 下载状态列表的表名
-        this.putStatesTime = 1000; // 每隔指定时间存储一次最新的下载状态
-        this.needPutStates = false; // 指示是否需要更新存储的下载状态
         this.IDB = new _utils_IndexedDB__WEBPACK_IMPORTED_MODULE_6__.IndexedDB();
         this.init();
     }
+    IDB;
+    DBName = 'PFD';
+    DBVer = 1;
+    dataName = 'taskData'; // 下载任务数据的表名
+    statesName = 'taskStates'; // 下载状态列表的表名
+    putStatesTime = 1000; // 每隔指定时间存储一次最新的下载状态
+    needPutStates = false; // 指示是否需要更新存储的下载状态
+    // 本模块所操作的下载数据的 id
+    // 使用抓取完成时的时间戳作为当前下载任务的 id
+    taskId;
     async init() {
         await this.initDB();
         this.bindEvents();
@@ -6866,21 +6392,9 @@ __webpack_require__.r(__webpack_exports__);
 // 保存粉丝卡
 // 生成粉丝卡的代码是从 Fanbox 的代码里逆向出来的。因为粉丝卡是动态生成的，需要在一张静态的背景图片上绘制文字，为了保持生成的效果与 Fanbox 完全一致，需要逆向代码（当然我也可以偷懒了😄）
 class SaveFanCard {
-    constructor() {
-        this.displayName = true; // 是否显示用户名
-        this.busy = false; // 是否正在保存粉丝卡
-        this.errorCount = 0;
-        this.config = {
-            canvasWidth: 1280,
-            canvasHeight: 800,
-            fontFamily: 'Arial, BlinkMacSystemFont, Segoe UI, Roboto, Oxygen, Ubuntu, Cantarell, Droid Sans, Helvetica Neue, Hiragino Kaku Gothic ProN, Meiryo, sans-serif',
-            assets: {
-                cardMask: '',
-                logoDark: 'data:image/png;base64,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',
-                logoLight: 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAASQAAAAoCAYAAABXTIcjAAAOXUlEQVR4Xu1d7bEltRGVIsBEYIgAiMBLBIYIYCPAROAlAkMEZiMAR2CIAIjASwRABHKdKWlqrkbd5+hj7nuX2qna2h9v7ow+uo9OH7V6Ynh7vR2BtyPwpxmBlNJfQgh/DyG8F0J4UXXs5xDCmxDCf2KM+P/ZXTGllAZahc7g3w+5c+iodAnv+yrG+Or4sJTStyGEv5IXvGSDnFL6d54o61G/xBj/Ub0bffyb9+4YYyx/Tyl9HUL4gg3G8TfevSkl+v4QwusY4+fsnVW/Pgwh/KvnN9a9McaPSR8wf5+J78I84n7pSinB6f4r3PxxjBFj2byE55x+L/zGeh3a8Xv2nx9jjLL/OO0HAP0zhKDaAdoAXzPHBO9KKcEfAHDeteo5L0cBqW4cBvRL1rncQQaALUDCIANMvAvvBxhYBgcH/Ik84+QMCiBUgPRJCOG7WQcpvxcAHLd2OXGeB9WRaVcYuKaU/kcWguM7usC1AxTc56aU4NBop3WtBKT6HRI4OLaNBRCLONhR7wWfgc8BIE+XMC74DRgX7N68Ukq/kfYBmF+sAqTSkK9jjF+ShnUDUnYgDNg7zrPfxBjfdyaNrdK/xhhhlDfXACDBKDD47KIgIhoD3vM+Y4eNft0FkDr6UJrozuNEP2A/GKem42Ub82zzSkAq3XoVY/yKGc7x75n1q6zIejQIBfpngdL3AksybTClpBCKbXxXAxI6/G2M8aUDDKOAhBUAlNS7mrQ8x9VY/bwVpAkQvYCUDRsT/AFp6zd1eDjobE0gZUbdwSzYo4LHkERjrN8hA2xnP9xFgLDRewASxuEUITi+hKhhFozK401QEsfYbHdKCSF1rWcdu7Xb8BWA5A6qEII0O5ZBBbqVx5KatFxwCtOpBwFJ0ZE2iup5e0pJAeGuEKe8TzQyCka4gQASY6atd1D2ONiPHzy965kAErr2EdOVRNuQ5u9wkzk+gh80ma3IkPf5vgqQ0MfmKjcKSJl5KA76bk09BQ3DdABhIk4OmVKSdCRBe1Gosuy8FdW/V8gG3Q76Xc8lg+wAsHqhxVOHbGWMGHAqemjPeB/vtSIFxV4+jTHCZvcrb0h5Gxo3ZOBKQGoKXZOAhJCLsaQbcVsw2D9ijGYoNwhIqo7khiYpJcWZ5fDm3oCUWa2ip9XOI+tIwvzWz/ZCi+cCSOaCnhdmFgKNghF+B/8CQzvpSYIv3Pj8iFSiANJr6EKHHgIpEbeybfjmoM4AksiSboxZQGg3ZhcmoRmypJQwsWyMTitKBRpMbxvSj/I4KiueZNgW01OZovESCWgHAMkEuwtCtpuwPIcvGHcwfWYblh7aM2+/ZIDBAokNG/bOMhXNHWtxrPd5G5FKFEBqbcOjg6Bmbn5OCKFF4ZiTMYBg27MY1G0yhfj1D0wU2XmheUAthxSAEO30VmvF8OTQpnZ60bjc3B2GViQnC84CO7KcxAXr8m6xH3VTLWdfzZCaOmFmDhCRPYCwQEHR5GDXnxzTcPI7kVPENoY2lmTtWAsL7W7TglRy6uMQIOUVVgGGFphNAVJ+N5uUzVEF4Y/uaEwwJGWr0xS2hdUFQzGkH3UwpFlA8kJOMO+SVdzCNroL2dGP+vnW5sddACm3m9mHtbnD8nnweFMUF3yijFXzGYJdbmAmLBRNMjAMSHlQGXu4CpAUMHw3J0KecovyiFN2JPbRCtmUNnorkbJTJ4U1LW8XDGZnmowJGc9nOhry1XCPtWL/HGP8iL1b7Ef9mGZO0tUhWxWOMwbc8h1ls4QlgCo6LJpqLggCS/oUDI1k5zcBdxaQ2C7QJYAksiSApbetTtnRDCDl3yo60mlXUHzvsH7UwSyGGZKgH5XjJt6xj+bYdDq2hWmtrPx7MiQGSK28J2WXWUkZUBa7GfbOfM8kA48MSAoD8RZYiV2MhmwiaJosREi1H9aP7gRIrtFDdxM0PqojDTIkDMFpa/3ODImFbCdgSSkxAiAtUiklKW2A5Jcpi63lfyYZmAUkFrKdRKvZXbZqdWRakjUgsjNPAhIzOrSvxSIVsB3Wj+4ESJ5t4BDzlpuUUvKOBFEdaQKQ8PqbRenOgORt3VvHmNiZwB67Zlou06IU2275nyuVDAOSmGPSop1sIKRQqsOpWoMisSMxdDIzlQUGgFecjEh0MrkPhsbDQgaTvTFdJ4+bN897nwngUx1JGCs4gJXdf2Nr9wCkzE5QZcGTE6wdNuY77gHzajFnZMKdf/HkRMtUXNCcASTlHE0ra5oNqgxIKmBUoyKvIurzCbVlh4JPTifshEjU3AMOwZHxczBQVjcH43lzj/Ds3XGEci2ujqS8yymzUuesrdaQMPfH0iJghexE/s4eB7QyWfMTwr8me6/apGhatRm6C2k3IGVkBMKzQ31WDsZqQFJW+uOgdDGLmZAtAxqL+1tHT1go2gWqEwxJIUMj4uv+G2EbebaOESpAeGVFdp3qAoakjN/xHuRmvTCypBU77wEkBUxYTqC6Y1f6SO1WAaRSjK081D0Qehhd60zMUkBSWUxuF63bUlvQAkBCMhorhHZjSMKRkSn9aDLcrYeoBUgsHNhZjyCwMqdwHTWL596icAwfVzOkHkD6MSczWiVAKCCxs5ED7IZGKwKb7yIDCiD1DGq51zs9fwUgMUZR2kVF0gsASdnRuAEYQfjvYnlPwJC8OT7ZBumvWxWBhWwZkFj+zgaQT8iQAEJgLADHRwMkVdz+PcaI3ED3ugqQTOooOBtF5QrpWQLe8XZapGs1IGU2wnSkHSgFxjCtH13JkBhAtKoLppTc+lFEo6MMSZiDbUF4QkAqZgc7QVtuTsyr8/VEDEk5AF76R5n9FYA0UwQLDe8FJCUWPuKMvBOhhoPMEAQBcWcBgqZC43C2CqkGrjynnBss9woU3qqZ7pWo8BY4FZC8vKhtY+EZAJLpuALQu3WpGgut4jdT4XLDfmgVh9WARBFwJUMSyxvU40IHpWJgTA+hhpALpbs6UgE1waHpGCtAohi48pwGIDERf0QEnzmEXA5as9CZid8jFSORclAX8GcH0suw3yRGivN1b1F7pAyKa7+rAAm7A5+zKnd5ZV6mIQnOa/mU7NSzonbuM3MG3LbpQsL7pvWjixkSO/zZSgVhgq13jIH99rij54WG35CvxYwA0qndeRGF7sI2Om4yyS8AJLZwwEzMTHmxPS3/cwnBDCABhMAevle+NnKg9EsAaZAdlWbILEkACMqQRCDeJp8cGXGLyYmMZrtNNCh5xRWB18pApjqgU3OpB5C8HU/sJlsHsdG9JYB08ANl97VmScx3ZDlCsWtSNWCEHZXum3alAFJdoA3OzJLlTN9YFbIJWgvzT4klKRPHNCRRi8LXJqBzeBUWu9MWrEG4CJCYk8FurG+u3XyLr9FuqxxGDyBR4HOMZikgZZtg58HqTHJ2v6wvCn44ewLB8z+zRK8CSF0iM0MBYSCk9wnFn34lBbDcusWHlWxaQ8rGx0RE5KHgHu/0u7wCCvPAHLnJCrznCuI9a5b399EqhnWOl5oiUrflCkCiNnH8EIQwvhLzF3Zy0fdmxni2ZTaGzPdM23pIQBLYEQYEuSfsw5A0JFnIkBgAYPWDjuFpC7S0hOrxFzEkph+pzWvdZ9VoZ+NaAxLLSbLaeAUgMUZZl8BlAIa2UxsRjuvgOc2cPfF8JjYIoNd5XwhqEoJHBSR26nljWQKYUJYkPEPSkPLKwjQACI3WF0CX6UdXaEjiqjsDSM3EOgFYW0DCQp9WO68AJAYwNSApYKoUaGPfKET/m4K2UJp5a7O44XTaoHk4QBLYEQaz7FgpWaTuirIYkGj453jsMv3oIkBiq/0MGJXftmoEdTGk3HelQNk9Qja2sLYqQbBFzWVJIlDgGa3dULksjsikTv17REBimaE3nST1djDwbEWhIKKI2qKO1K2hjHq5wCy6NCRh5Rxt6vF3rfpaI4CkONalgCQCw0gSKdqNjG8wHNjufqWUUC6YbR7gfis8ZkB+s4sqaF47eSiNfChAGnEiMV72Ph64EpCY83hOS7WBHo8fGUvv+cImQ0/zrHtPjiL0w/rCiPK582M7loRsKSUkRoJNWqH58Z0jjPD4e9huASVEC15aA+srdihZqFfvCnaHmI8GSCz3oXVwU1kNTZa0OGQb3XZeqh+tDtlEek7TLNiZNqz89QHNCUBSwnnmpDMLDAPoqc+7s4c7f7fKBjG968R2sp0pet0eHj4MIAmGh/5bJU+UrFTr09/LGFKeoN6V2aTQE0a3NDGyR9cjLIuFBCejF+zCYki9tXxGGNLMFJkpHkKfZ97b6qfCjqxPSyna4s6sHgmQGDsya/UKX8DABFrfwVoNSIrT1Qa1LP+oPFg0apoWkUGW5aVIDE+cp7pUC2Mp3sFc1u6nYkhmDtBh/kbsiAGVpR0p7MgDfvY59b0Kx0MAkhgSMHGaUUfrW12rAUmJq2vDWaofXRCysd0iaYdwZJ4FYB2uFFBNwr0YEhZWVI2sD+WewEQIcRkAHf+O3L0PjWqVbH7dkjjihsdGCB4FkJSVjG3fd1HHw0q0GpB6dSSJXfRY3kpAEkFEyr4XNYe6DvYwQxLfV4b2HoAkg1FuO2wJ9vlB7/xX95vvFcNxl8ELiwaas+mDzx6QRIN3qwoeJk+mjlcB0oCOJLGLXoMUjYSGbGKYRZ9zGO8uvU/oh/tucfsdzbsakHBm9NXIOVFxJ9kyEVY6l7Ej9QvQinb68hEASWFHdAdH1DpwW61RLGVIuR098f9y/WgxQ6J9UfO0crsUJrvP0QJAUnZhrwAkAAFkhFIxo1m6Vl1o8jhgLlS2hGodAMBTdcrD4qDsREoHekWm9SaqHf4z3JfZFsvFAHWk8fujj0cu37J9rNG5UElxylEefZwerf35CA+ABHOLf+U8WSkWBwDCkam72rhob+H/WrvKYRGXdawAAAAASUVORK5CYII=',
-            },
-        };
-    }
+    displayName = true; // 是否显示用户名
+    busy = false; // 是否正在保存粉丝卡
+    errorCount = 0;
     async save(scope) {
         if (this.busy) {
             const msg = _Lang__WEBPACK_IMPORTED_MODULE_1__.lang.transl('_正在保存粉丝卡请稍后再试');
@@ -6947,17 +6461,22 @@ class SaveFanCard {
             this.errorCount++;
             // 如果你没有赞助这个创作者，会返回 404 状态码
             let msg = _Lang__WEBPACK_IMPORTED_MODULE_1__.lang.transl('_你不是xx的赞助者无法生成粉丝卡', createId);
-            if ((error === null || error === void 0 ? void 0 : error.status) !== 404) {
+            if (error?.status !== 404) {
                 msg = _Lang__WEBPACK_IMPORTED_MODULE_1__.lang.transl('_获取你对xx的赞助计划时出现错误', createId);
             }
             _Log__WEBPACK_IMPORTED_MODULE_2__.log.error(msg);
             _MsgBox__WEBPACK_IMPORTED_MODULE_3__.msgBox.error(msg);
             return null;
         }
-        return Object.assign(Object.assign({}, supportInfo.body.plan), { creatorName: supportInfo.body.plan.user.name, yourName: supportInfo.body.supportTransactions[0].supporter.name, 
+        return {
+            ...supportInfo.body.plan,
+            creatorName: supportInfo.body.plan.user.name,
+            yourName: supportInfo.body.supportTransactions[0].supporter.name,
             // coverImageUrl 可能为 null，这是因为创作者没有为该赞助等级设置图片
             backgroundURL: supportInfo.body.plan.coverImageUrl ||
-                supportInfo.body.supporterCardImageUrl, sinceDate: supportInfo.body.supportStartDatetime });
+                supportInfo.body.supporterCardImageUrl,
+            sinceDate: supportInfo.body.supportStartDatetime,
+        };
     }
     // 在需要时加载遮罩图片（蒙版）
     loadMaskURL() {
@@ -6965,6 +6484,16 @@ class SaveFanCard {
             this.config.assets.cardMask = chrome.runtime.getURL('images/cardMask.png');
         }
     }
+    config = {
+        canvasWidth: 1280,
+        canvasHeight: 800,
+        fontFamily: 'Arial, BlinkMacSystemFont, Segoe UI, Roboto, Oxygen, Ubuntu, Cantarell, Droid Sans, Helvetica Neue, Hiragino Kaku Gothic ProN, Meiryo, sans-serif',
+        assets: {
+            cardMask: '',
+            logoDark: 'data:image/png;base64,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',
+            logoLight: 'data:image/png;base64,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',
+        },
+    };
     async loadImage(url) {
         // 粉丝卡的背景图是保存在 pixiv 上的，例如：
         // https://pixiv.pximg.net/c/1280x800_90_a2_g5/fanbox/public/images/plan/335879/cover/VyxOduCIButmyx17qGlmYOW4.jpeg
@@ -7176,11 +6705,12 @@ __webpack_require__.r(__webpack_exports__);
 // 显示跳过下载的文件数量
 class ShowSkipCount {
     constructor(el) {
-        this.count = 0; // 跳过下载的数量
         this.el = el;
         _Lang__WEBPACK_IMPORTED_MODULE_1__.lang.register(this.el);
         this.bindEvents();
     }
+    count = 0; // 跳过下载的数量
+    el; // 显示提示文本的容器
     bindEvents() {
         window.addEventListener(_EVT__WEBPACK_IMPORTED_MODULE_0__.EVT.list.crawlStart, () => {
             this.reset();
@@ -7256,6 +6786,8 @@ class ShowStatusOnTitle {
     constructor() {
         this.bindEvents();
     }
+    flashingTimer; // title 闪烁时，使用的定时器
+    pageSwitchTimer; // 页面切换后，检查页面标题是否变化了的定时器
     bindEvents() {
         window.addEventListener(_EVT__WEBPACK_IMPORTED_MODULE_1__.EVT.list.crawlStart, () => {
             this.set(Flags.crawling);
@@ -7912,6 +7444,15 @@ So the file name set by the downloader is lost, and the file name becomes the la
         '게시물의 <span class="key">텍스트</span> 저장',
         'Сохранить <span class="key">текст</span> в публикациях',
     ],
+    _格式: [`格式：`, `格式：`, `Format:`, `形式：`, `형식:`, `Формат:`],
+    _保存投稿中的文字的说明: [
+        `你可以设置是否保存投稿的正文文本。<br><br>有两种格式可以选择：<br>1. TXT：由于 TXT 文件里只能保存纯文本，所以查看它时不会显示投稿里的图片、视频、超链接等内容。<br>2. HTML：查看时可以显示投稿里的图片、视频、超链接等内容，阅读体验更好。<br><br>另外，由于每篇投稿的外部链接、正文、评论都会保存到同一个文件里，所以这个设置里的格式就是这些内容的保存格式。<br>PS：如果你关闭了这个设置，那么外部链接和评论总是会保存到 TXT 文件里。`,
+        `你可以設定是否儲存投稿的正文文字。<br><br>有兩種格式可以選擇：<br>1. TXT：由於 TXT 檔案只能儲存純文字，查看時不會顯示投稿中的圖片、影片、超連結等內容。<br>2. HTML：查看時可以顯示投稿中的圖片、影片、超連結等內容，閱讀體驗更好。<br><br>此外，由於每篇投稿的外部連結、正文、評論都會儲存在同一個檔案裡，所以此設定中的格式就是這些內容的儲存格式。<br>PS：如果你關閉了這個設定，外部連結和評論一律會儲存到 TXT 檔案裡。`,
+        `You can choose whether to save the main text of posts.<br><br>There are two available formats:<br>1. TXT: Because TXT files can only contain plain text, images, videos, hyperlinks, and other content in the post will not be displayed when viewing them.<br>2. HTML: Images, videos, hyperlinks, and other content in the post can be displayed when viewing it, providing a better reading experience.<br><br>In addition, each post's external links, main text, and comments are saved in the same file, so this setting determines the format used to save all of that content.<br>PS: If you turn off this setting, external links and comments are always saved in a TXT file.`,
+        `投稿の本文テキストを保存するかどうかを設定できます。<br><br>選択できる形式は2種類あります。<br>1. TXT：TXT ファイルにはプレーンテキストしか保存できないため、投稿内の画像、動画、ハイパーリンクなどは表示されません。<br>2. HTML：投稿内の画像、動画、ハイパーリンクなどを表示できるため、より快適に閲覧できます。<br><br>また、各投稿の外部リンク、本文、コメントは同じファイルに保存されるため、この設定の形式はこれらの内容の保存形式になります。<br>PS：この設定をオフにした場合、外部リンクとコメントは常に TXT ファイルに保存されます。`,
+        `게시물의 본문 텍스트를 저장할지 설정할 수 있습니다.<br><br>선택할 수 있는 형식은 두 가지입니다.<br>1. TXT: TXT 파일에는 일반 텍스트만 저장할 수 있으므로 게시물의 이미지, 동영상, 하이퍼링크 등의 내용은 볼 때 표시되지 않습니다.<br>2. HTML: 게시물의 이미지, 동영상, 하이퍼링크 등의 내용을 표시할 수 있어 더 나은 읽기 경험을 제공합니다.<br><br>또한 각 게시물의 외부 링크, 본문, 댓글은 같은 파일에 저장되므로 이 설정의 형식이 이러한 내용의 저장 형식이 됩니다.<br>PS: 이 설정을 끄면 외부 링크와 댓글은 항상 TXT 파일에 저장됩니다.`,
+        `Вы можете выбрать, сохранять ли основной текст публикаций.<br><br>Доступны два формата:<br>1. TXT: поскольку в TXT-файлах можно сохранить только обычный текст, изображения, видео, гиперссылки и другое содержимое публикации при просмотре не будут отображаться.<br>2. HTML: при просмотре могут отображаться изображения, видео, гиперссылки и другое содержимое публикации, что делает чтение удобнее.<br><br>Кроме того, внешние ссылки, основной текст и комментарии каждой публикации сохраняются в одном файле, поэтому этот параметр определяет формат сохранения всего этого содержимого.<br>PS: если отключить этот параметр, внешние ссылки и комментарии всегда будут сохраняться в TXT-файл.`,
+    ],
     _保存投稿中的评论: [
         '保存投稿中的<span class="key">评论</span>',
         '儲存投稿中的<span class="key">評論</span>',
@@ -8293,17 +7834,17 @@ So the file name set by the downloader is lost, and the file name becomes the la
         'Поддержать меня',
     ],
     _赞助方式提示: [
-        `如果您觉得这个工具对您有帮助，可以考虑赞助我，谢谢！<br>
+        `如果您觉得这个工具对您有帮助，可以考虑赞助我，谢谢~<br>
     您可以在 Patreon 上赞助我：<br>
-    <a href="https://www.patreon.com/xuejianxianzun" target="_blank">https://www.patreon.com/xuejianxianzun</a><br><br>
+    <a href="https://www.patreon.com/xuejianxianzun" target="_blank">https://www.patreon.com/xuejianxianzun</a><br>
     中国大陆用户可以在“爱发电”上赞助我：<br>
-    <a href="https://afdian.com/a/xuejianxianzun" target="_blank">https://afdian.com/a/xuejianxianzun</a><br><br>
+    <a href="https://afdian.com/a/xuejianxianzun" target="_blank">https://afdian.com/a/xuejianxianzun</a><br>
     也可以扫描二维码：<br>
     <a href="https://github.com/xuejianxianzun/PixivBatchDownloader#%E6%94%AF%E6%8C%81%E5%92%8C%E6%8D%90%E5%8A%A9" target="_blank">在 Github 上查看二维码</a>
     `,
-        `如果您覺得這個工具對您有幫助，可以考慮贊助我，謝謝！<br>
+        `如果您覺得這個工具對您有幫助，可以考慮贊助我，謝謝~<br>
     您可以在 Patreon 上贊助我：<br>
-    <a href="https://www.patreon.com/xuejianxianzun" target="_blank">https://www.patreon.com/xuejianxianzun</a><br><br>
+    <a href="https://www.patreon.com/xuejianxianzun" target="_blank">https://www.patreon.com/xuejianxianzun</a><br>
     中國大陸使用者可以在“愛發電”上贊助我：<br>
     <a href="https://afdian.com/a/xuejianxianzun" target="_blank">https://afdian.com/a/xuejianxianzun</a>
     `,
@@ -9359,14 +8900,40 @@ Firefox 브라우저는 Firefox Add-ons에서 설치할 수 있습니다.<br><a 
 Браузеры на базе Chromium, например Chrome и Edge, можно установить из Chrome Web Store:<br><a href="https://chromewebstore.google.com/detail/powerful-pixiv-downloader/dkndmhgdcmjdmkdonmbgjpijejdcilfh" target="_blank">Powerful Pixiv Downloader</a><br><br>
 Для Firefox его можно установить из Firefox Add-ons:<br><a href="https://addons.mozilla.org/en-US/firefox/addon/powerfulpixivdownloader/" target="_blank">Powerful Pixiv Downloader</a><br>`,
     ],
-    _更新说明4_9_3: [
-        `🐞Fanbox 的 API 变化导致下载器无法抓取文章列表，现在修复。`,
-        `🐞Fanbox 的 API 變化導致下載器無法抓取文章列表，現在修復。`,
-        `🐞The API change of Fanbox caused the downloader to fail to crawl the post list, now fixed.`,
-        `🐞Fanbox の API の変更により、ダウンローダーが投稿リストをクロールできなくなりましたが、現在修正されています。`,
-        `🐞Fanbox의 API 변경으로 인해 다운로더가 게시물 목록을 크롤링하지 못했지만 이제 수정되었습니다.`,
-        `🐞Изменение API Fanbox привело к тому, что загрузчик не смог сканировать список публикаций, теперь исправлено.`,
+    _更新说明5_0_0: [
+        `<strong>✨在保存投稿中的文字时，新增了 HTML 格式</strong><br>
+之前该设置只有 TXT 格式，查看时不会显示投稿里的图片、视频等内容。新增的 HTML 格式可以显示这些内容，阅读体验接近 Fanbox 的网页浏览效果。<br>
+感谢 <a href="https://github.com/Eganchiyu" target="_blank">Eganchiyu</a> 提交了该功能。<br>
+<strong>✨新增设置：保存投稿中的评论</strong><br>
+感谢 <a href="https://github.com/Eganchiyu" target="_blank">Eganchiyu</a> 提交了该功能。`,
+        `<strong>✨儲存投稿中的文字時，新增了 HTML 格式</strong><br>
+之前此設定只有 TXT 格式，查看時不會顯示投稿中的圖片、影片等內容。新增的 HTML 格式可以顯示這些內容，閱讀體驗接近 Fanbox 的網頁瀏覽效果。<br>
+感謝 <a href="https://github.com/Eganchiyu" target="_blank">Eganchiyu</a> 提交了此功能。<br>
+<strong>✨新增設定：儲存投稿中的評論</strong><br>
+感謝 <a href="https://github.com/Eganchiyu" target="_blank">Eganchiyu</a> 提交了此功能。`,
+        `<strong>✨ Added HTML format when saving text in posts</strong><br>
+Previously, this setting only supported TXT format, which did not display images, videos, and other content from posts when viewed. The new HTML format displays this content, offering a reading experience close to browsing Fanbox on the web.<br>
+Thanks to <a href="https://github.com/Eganchiyu" target="_blank">Eganchiyu</a> for contributing this feature.<br>
+<strong>✨ New setting: Save comments in posts</strong><br>
+Thanks to <a href="https://github.com/Eganchiyu" target="_blank">Eganchiyu</a> for contributing this feature.`,
+        `<strong>✨投稿内のテキスト保存に HTML 形式を追加</strong><br>
+以前はこの設定で TXT 形式しか選択できず、閲覧時に投稿内の画像、動画などは表示されませんでした。新しい HTML 形式ではこれらの内容を表示でき、Fanbox のウェブページに近い閲覧体験を得られます。<br>
+この機能を提供してくださった <a href="https://github.com/Eganchiyu" target="_blank">Eganchiyu</a> に感謝します。<br>
+<strong>✨新しい設定：投稿内のコメントを保存</strong><br>
+この機能を提供してくださった <a href="https://github.com/Eganchiyu" target="_blank">Eganchiyu</a> に感謝します。`,
+        `<strong>✨게시물의 텍스트를 저장할 때 HTML 형식 추가</strong><br>
+이전에는 이 설정에서 TXT 형식만 지원했으며, 볼 때 게시물의 이미지, 동영상 등의 내용이 표시되지 않았습니다. 새 HTML 형식은 이러한 내용을 표시할 수 있어 Fanbox 웹페이지를 보는 것과 가까운 읽기 경험을 제공합니다.<br>
+이 기능을 기여해 주신 <a href="https://github.com/Eganchiyu" target="_blank">Eganchiyu</a>님께 감사드립니다.<br>
+<strong>✨새 설정: 게시물의 댓글 저장</strong><br>
+이 기능을 기여해 주신 <a href="https://github.com/Eganchiyu" target="_blank">Eganchiyu</a>님께 감사드립니다.`,
+        `<strong>✨ Добавлен формат HTML при сохранении текста публикаций</strong><br>
+Ранее в этой настройке был доступен только формат TXT, при просмотре которого изображения, видео и другое содержимое публикаций не отображались. Новый формат HTML позволяет отображать это содержимое и делает чтение ближе к просмотру страницы Fanbox в браузере.<br>
+Спасибо <a href="https://github.com/Eganchiyu" target="_blank">Eganchiyu</a> за добавление этой функции.<br>
+<strong>✨ Новая настройка: сохранять комментарии к публикациям</strong><br>
+Спасибо <a href="https://github.com/Eganchiyu" target="_blank">Eganchiyu</a> за добавление этой функции.`,
     ],
+    _说明: [`说明`, `說明`, `Explanation`, `説明`, `설명`, `Описание`],
+    _帮助: [`帮助`, `幫助`, `Help`, `ヘルプ`, `도움말`, `Справка`],
     _开始获取投稿列表: [
         `开始获取投稿列表`,
         `開始取得投稿清單`,
@@ -9421,18 +8988,6 @@ __webpack_require__.r(__webpack_exports__);
 // 设置表单
 class Form {
     constructor() {
-        /**所有的美化表单元素 */
-        // 每个美化的 input 控件后面必定有一个 span 元素
-        // label 和 子选项区域则不一定有
-        this.allBeautifyInput = [];
-        /**一些固定格式的帮助元素 */
-        this.tips = [
-            {
-                wrapID: 'tipCreateFolder',
-                wrap: document.createElement('span'),
-                settingName: 'tipCreateFolder',
-            },
-        ];
         this.form = _Tools__WEBPACK_IMPORTED_MODULE_1__.Tools.useSlot('form', _FormHTML__WEBPACK_IMPORTED_MODULE_2__.formHtml);
         _Theme__WEBPACK_IMPORTED_MODULE_10__.theme.register(this.form);
         _Lang__WEBPACK_IMPORTED_MODULE_7__.lang.register(this.form);
@@ -9442,7 +8997,21 @@ class Form {
         new _SaveNamingRule__WEBPACK_IMPORTED_MODULE_4__.SaveNamingRule(this.form.userSetName);
         new _FormSettings__WEBPACK_IMPORTED_MODULE_5__.FormSettings(this.form);
         this.bindEvents();
+        this.showMsgWhenClickBtn();
     }
+    form;
+    /**所有的美化表单元素 */
+    // 每个美化的 input 控件后面必定有一个 span 元素
+    // label 和 子选项区域则不一定有
+    allBeautifyInput = [];
+    /**一些固定格式的帮助元素 */
+    tips = [
+        {
+            wrapID: 'tipCreateFolder',
+            wrap: document.createElement('span'),
+            settingName: 'tipCreateFolder',
+        },
+    ];
     getElements() {
         // 获取所有的美化控件和它们对应的 span 元素
         const allCheckBox = this.form.querySelectorAll('input[type="checkbox"]');
@@ -9613,6 +9182,19 @@ class Form {
             }
         }
     }
+    /**点击一些按钮时，通过 msgBox 显示帮助 */
+    showMsgWhenClickBtn() {
+        const btns = this.form.querySelectorAll('.showMsgBtn');
+        btns.forEach((btn) => {
+            btn.addEventListener('click', () => {
+                const title = btn.dataset.title;
+                const msg = btn.dataset.msg;
+                _MsgBox__WEBPACK_IMPORTED_MODULE_9__.msgBox.show(_Lang__WEBPACK_IMPORTED_MODULE_7__.lang.transl(msg), {
+                    title: _Lang__WEBPACK_IMPORTED_MODULE_7__.lang.transl(title),
+                });
+            });
+        });
+    }
     // 是否显示提示
     showTips() {
         for (const item of this.tips) {
@@ -9645,73 +9227,74 @@ __webpack_require__.r(__webpack_exports__);
 
 class FormSettings {
     constructor(form) {
-        // 没有填写 userSetName 字段，因为这个字段由 nameRuleManager 管理
-        this.inputFileds = {
-            checkbox: [
-                'image',
-                'music',
-                'video',
-                'compressed',
-                'ps',
-                'other',
-                'free',
-                'pay',
-                'feeSwitch',
-                'idRangeSwitch',
-                'postDate',
-                'saveLink',
-                'saveText',
-                'saveComment',
-                'autoStartDownload',
-                'showAdvancedSettings',
-                'bgDisplay',
-                'boldKeywords',
-                'showNotificationAfterDownloadComplete',
-                'zeroPadding',
-                'deduplication',
-                'savePostCover',
-                'unifiedURL',
-                'titleMustTextSwitch',
-                'titleCannotTextSwitch',
-                'fileNameIncludeSwitch',
-                'fileNameExcludeSwitch',
-                'totalDownloadLimitSwitch',
-            ],
-            text: [
-                'fee',
-                'idRangeInput',
-                'downloadThread',
-                'dateFormat',
-                'bgOpacity',
-                'zeroPaddingLength',
-                'titleMustText',
-                'titleCannotText',
-                'nameruleForNonImages',
-                'fileNameInclude',
-                'fileNameExclude',
-                'downloadInterval',
-                'crawlInterval',
-                'totalDownloadLimit',
-            ],
-            radio: [
-                'idRange',
-                'feeRange',
-                'bgPositionY',
-                'userSetLang',
-                'imageSize',
-                'textFormat',
-                'theme',
-            ],
-            textarea: [],
-            datetime: ['postDateStart', 'postDateEnd'],
-        };
-        this.restoreTimer = 0;
         this.form = form;
         _NameRuleManager__WEBPACK_IMPORTED_MODULE_3__.nameRuleManager.registerInput(this.form.userSetName);
         this.bindEvents();
         this.restoreFormSettings();
         this.ListenChange();
     }
+    form;
+    // 没有填写 userSetName 字段，因为这个字段由 nameRuleManager 管理
+    inputFileds = {
+        checkbox: [
+            'image',
+            'music',
+            'video',
+            'compressed',
+            'ps',
+            'other',
+            'free',
+            'pay',
+            'feeSwitch',
+            'idRangeSwitch',
+            'postDate',
+            'saveLink',
+            'saveText',
+            'saveComment',
+            'autoStartDownload',
+            'showAdvancedSettings',
+            'bgDisplay',
+            'boldKeywords',
+            'showNotificationAfterDownloadComplete',
+            'zeroPadding',
+            'deduplication',
+            'savePostCover',
+            'unifiedURL',
+            'titleMustTextSwitch',
+            'titleCannotTextSwitch',
+            'fileNameIncludeSwitch',
+            'fileNameExcludeSwitch',
+            'totalDownloadLimitSwitch',
+        ],
+        text: [
+            'fee',
+            'idRangeInput',
+            'downloadThread',
+            'dateFormat',
+            'bgOpacity',
+            'zeroPaddingLength',
+            'titleMustText',
+            'titleCannotText',
+            'nameruleForNonImages',
+            'fileNameInclude',
+            'fileNameExclude',
+            'downloadInterval',
+            'crawlInterval',
+            'totalDownloadLimit',
+        ],
+        radio: [
+            'idRange',
+            'feeRange',
+            'bgPositionY',
+            'userSetLang',
+            'imageSize',
+            'textFormat',
+            'theme',
+        ],
+        textarea: [],
+        datetime: ['postDateStart', 'postDateEnd'],
+    };
+    restoreTimer = 0;
     bindEvents() {
         window.addEventListener(_EVT__WEBPACK_IMPORTED_MODULE_0__.EVT.list.settingChange, () => {
             window.clearTimeout(this.restoreTimer);
@@ -9830,8 +9413,6 @@ __webpack_require__.r(__webpack_exports__);
 // 其他类必须使用 nameRuleManager.rule 存取器来存取命名规则
 class NameRuleManager {
     constructor() {
-        // 命名规则输入框的集合
-        this.inputList = [];
         this.bindEvents();
     }
     bindEvents() {
@@ -9856,6 +9437,8 @@ class NameRuleManager {
         (0,_Settings__WEBPACK_IMPORTED_MODULE_3__.setSetting)('userSetName', str);
         this.setInputValue();
     }
+    // 命名规则输入框的集合
+    inputList = [];
     // 注册命名规则输入框
     registerInput(input) {
         this.inputList.push(input);
@@ -9937,29 +9520,29 @@ __webpack_require__.r(__webpack_exports__);
 // 控制每个设置的隐藏、显示
 // 设置页数/个数的提示文本
 class Options {
-    constructor() {
-        // 保持显示的选项的 id
-        this.whiteList = [2, 21, 32, 51, 13, 17, 33, 60];
-        // 某些页面类型需要隐藏某些选项。当调用 hideOption 方法时，把选项 id 保存起来
-        // 优先级高于 whiteList
-        this.hiddenList = [];
-        // 90 天内添加的设置项，显示 new 角标
-        this.now = Date.now();
-        this.newRange = 1000 * 60 * 60 * 24 * 90;
-        this.newOptions = [
-            {
-                // 颜色主题
-                id: 60,
-                // 2026-04-29
-                time: 1777455427080,
-            },
-        ];
-    }
     init(allOption) {
         this.allOption = allOption;
         this.handleShowAdvancedSettings();
         this.bindEvents();
     }
+    allOption;
+    wantPageEls;
+    // 保持显示的选项的 id
+    whiteList = [2, 21, 32, 51, 13, 17, 33, 60];
+    // 某些页面类型需要隐藏某些选项。当调用 hideOption 方法时，把选项 id 保存起来
+    // 优先级高于 whiteList
+    hiddenList = [];
+    // 90 天内添加的设置项，显示 new 角标
+    now = Date.now();
+    newRange = 1000 * 60 * 60 * 24 * 90;
+    newOptions = [
+        {
+            // 颜色主题
+            id: 60,
+            // 2026-04-29
+            time: 1777455427080,
+        },
+    ];
     bindEvents() {
         window.addEventListener(_EVT__WEBPACK_IMPORTED_MODULE_0__.EVT.list.settingChange, (ev) => {
             const data = ev.detail.data;
@@ -10100,14 +9683,6 @@ __webpack_require__.r(__webpack_exports__);
 // 保存和加载命名规则列表
 class SaveNamingRule {
     constructor(ruleInput) {
-        this.limit = 20; // 最大保存数量
-        this._show = false; // 是否显示列表
-        this.html = `
-  <div class="saveNamingRuleWrap">
-  <button class="nameSave textButton has_tip" type="button" data-xztip="_保存命名规则提示" data-xztext="_保存"></button>
-  <button class="nameLoad textButton" type="button" data-xztext="_加载"></button>
-  <ul class="namingRuleList"></ul>
-  </div>`;
         this.ruleInput = ruleInput;
         _Tools__WEBPACK_IMPORTED_MODULE_1__.Tools.clearSlot('saveNamingRule');
         const wrap = _Tools__WEBPACK_IMPORTED_MODULE_1__.Tools.useSlot('saveNamingRule', this.html);
@@ -10119,6 +9694,12 @@ class SaveNamingRule {
         this.createList();
         this.bindEvents();
     }
+    limit = 20; // 最大保存数量
+    saveBtn;
+    loadBtn;
+    listWrap;
+    ruleInput;
+    _show = false; // 是否显示列表
     set show(boolean) {
         this._show = boolean;
         boolean ? this.showListWrap() : this.hideListWrap();
@@ -10199,6 +9780,12 @@ class SaveNamingRule {
     hideListWrap() {
         this.listWrap.style.display = 'none';
     }
+    html = `
+  <div class="saveNamingRuleWrap">
+  <button class="nameSave textButton has_tip" type="button" data-xztip="_保存命名规则提示" data-xztext="_保存"></button>
+  <button class="nameLoad textButton" type="button" data-xztext="_加载"></button>
+  <ul class="namingRuleList"></ul>
+  </div>`;
 }
 
 
@@ -10251,97 +9838,91 @@ __webpack_require__.r(__webpack_exports__);
 
 class Settings {
     constructor() {
-        // 默认设置
-        this.defaultSettings = {
-            image: true,
-            music: true,
-            video: true,
-            compressed: true,
-            ps: true,
-            other: true,
-            free: true,
-            pay: true,
-            feeSwitch: false,
-            feeRange: '>=',
-            fee: 500,
-            idRangeSwitch: false,
-            idRangeInput: 0,
-            idRange: '>',
-            postDate: false,
-            // 默认的起始时间：2018-01-01
-            postDateStart: 1514764800000,
-            // 默认的结束时间：2030-01-01
-            postDateEnd: 1893456000000,
-            saveLink: true,
-            saveText: false,
-            textFormat: 'txt',
-            saveComment: false,
-            userSetName: 'fanbox/{user}/{date}-{title}/{index}',
-            autoStartDownload: true,
-            downloadThread: 2,
-            dateFormat: 'YYYY-MM-DD',
-            savePostCover: true,
-            userSetLang: 'auto',
-            tipCreateFolder: true,
-            whatIsNewFlag: 'xuejian&saber',
-            showAdvancedSettings: false,
-            bgDisplay: false,
-            bgOpacity: 60,
-            bgPositionY: 'center',
-            boldKeywords: true,
-            namingRuleList: [],
-            showNotificationAfterDownloadComplete: false,
-            zeroPadding: true,
-            zeroPaddingLength: 3,
-            deduplication: false,
-            showHowToUse: true,
-            unifiedURL: true,
-            titleMustTextSwitch: false,
-            titleMustText: [],
-            titleCannotTextSwitch: false,
-            titleCannotText: [],
-            nameruleForNonImages: 'fanbox/{user}/{date}-{title}/{name}',
-            fileNameIncludeSwitch: false,
-            fileNameInclude: [],
-            fileNameExcludeSwitch: false,
-            fileNameExclude: [],
-            downloadInterval: 1,
-            crawlInterval: 1,
-            totalDownloadLimitSwitch: true,
-            totalDownloadLimit: 10,
-            totalDownloadLimitByte: 10737418240,
-            imageSize: 'original',
-            theme: 'auto',
-        };
-        this.allSettingKeys = Object.keys(this.defaultSettings);
-        // 值为浮点数的选项
-        this.floatNumberKey = [
-            'downloadInterval',
-            'crawlInterval',
-            'totalDownloadLimit',
-        ];
-        // 值为整数的选项不必单独列出
-        // 值为数字数组的选项
-        this.numberArrayKeys = [];
-        // 值为字符串数组的选项
-        this.stringArrayKeys = [
-            'namingRuleList',
-            'titleMustText',
-            'titleCannotText',
-            'fileNameInclude',
-            'fileNameExclude',
-        ];
-        // 以默认设置作为初始设置
-        this.settings = _utils_Utils__WEBPACK_IMPORTED_MODULE_1__.Utils.deepCopy(this.defaultSettings);
-        this.store = _utils_Utils__WEBPACK_IMPORTED_MODULE_1__.Utils.debounce(() => {
-            // chrome.storage.local 的储存上限是 5 MiB（5242880 Byte）
-            chrome.storage.local.set({
-                [_Config__WEBPACK_IMPORTED_MODULE_3__.Config.settingStoreName]: this.settings,
-            });
-        }, 50);
         this.restore();
         this.bindEvents();
     }
+    // 默认设置
+    defaultSettings = {
+        image: true,
+        music: true,
+        video: true,
+        compressed: true,
+        ps: true,
+        other: true,
+        free: true,
+        pay: true,
+        feeSwitch: false,
+        feeRange: '>=',
+        fee: 500,
+        idRangeSwitch: false,
+        idRangeInput: 0,
+        idRange: '>',
+        postDate: false,
+        // 默认的起始时间：2018-01-01
+        postDateStart: 1514764800000,
+        // 默认的结束时间：2030-01-01
+        postDateEnd: 1893456000000,
+        saveLink: true,
+        saveText: false,
+        textFormat: 'txt',
+        saveComment: false,
+        userSetName: 'fanbox/{user}/{date}-{title}/{index}',
+        autoStartDownload: true,
+        downloadThread: 2,
+        dateFormat: 'YYYY-MM-DD',
+        savePostCover: true,
+        userSetLang: 'auto',
+        tipCreateFolder: true,
+        whatIsNewFlag: 'xuejian&saber',
+        showAdvancedSettings: false,
+        bgDisplay: false,
+        bgOpacity: 60,
+        bgPositionY: 'center',
+        boldKeywords: true,
+        namingRuleList: [],
+        showNotificationAfterDownloadComplete: false,
+        zeroPadding: true,
+        zeroPaddingLength: 3,
+        deduplication: false,
+        showHowToUse: true,
+        unifiedURL: true,
+        titleMustTextSwitch: false,
+        titleMustText: [],
+        titleCannotTextSwitch: false,
+        titleCannotText: [],
+        nameruleForNonImages: 'fanbox/{user}/{date}-{title}/{name}',
+        fileNameIncludeSwitch: false,
+        fileNameInclude: [],
+        fileNameExcludeSwitch: false,
+        fileNameExclude: [],
+        downloadInterval: 1,
+        crawlInterval: 1,
+        totalDownloadLimitSwitch: true,
+        totalDownloadLimit: 10,
+        totalDownloadLimitByte: 10737418240,
+        imageSize: 'original',
+        theme: 'auto',
+    };
+    allSettingKeys = Object.keys(this.defaultSettings);
+    // 值为浮点数的选项
+    floatNumberKey = [
+        'downloadInterval',
+        'crawlInterval',
+        'totalDownloadLimit',
+    ];
+    // 值为整数的选项不必单独列出
+    // 值为数字数组的选项
+    numberArrayKeys = [];
+    // 值为字符串数组的选项
+    stringArrayKeys = [
+        'namingRuleList',
+        'titleMustText',
+        'titleCannotText',
+        'fileNameInclude',
+        'fileNameExclude',
+    ];
+    // 以默认设置作为初始设置
+    settings = _utils_Utils__WEBPACK_IMPORTED_MODULE_1__.Utils.deepCopy(this.defaultSettings);
     bindEvents() {
         // 当设置发生变化时进行本地存储
         window.addEventListener(_EVT__WEBPACK_IMPORTED_MODULE_0__.EVT.list.settingChange, () => {
@@ -10376,6 +9957,12 @@ class Settings {
             _EVT__WEBPACK_IMPORTED_MODULE_0__.EVT.fire('settingInitialized');
         });
     }
+    store = _utils_Utils__WEBPACK_IMPORTED_MODULE_1__.Utils.debounce(() => {
+        // chrome.storage.local 的储存上限是 5 MiB（5242880 Byte）
+        chrome.storage.local.set({
+            [_Config__WEBPACK_IMPORTED_MODULE_3__.Config.settingStoreName]: this.settings,
+        });
+    }, 50);
     // 接收整个设置项，通过循环将其更新到 settings 上
     // 循环设置而不是整个替换的原因：
     // 1. 进行类型转换，如某些设置项是 number ，但是数据来源里是 string，setSetting 可以把它们转换到正确的类型
@@ -10582,35 +10169,35 @@ class DateFormat {
         r = r.replace('ss', ss);
         return r;
     }
+    static months = [
+        'Jan',
+        'Feb',
+        'Mar',
+        'Apr',
+        'May',
+        'Jun',
+        'Jul',
+        'Aug',
+        'Sept',
+        'Oct',
+        'Nov',
+        'Dec',
+    ];
+    static Months = [
+        'January',
+        'February',
+        'March',
+        'April',
+        'May',
+        'June',
+        'July',
+        'August',
+        'September',
+        'October',
+        'November',
+        'December',
+    ];
 }
-DateFormat.months = [
-    'Jan',
-    'Feb',
-    'Mar',
-    'Apr',
-    'May',
-    'Jun',
-    'Jul',
-    'Aug',
-    'Sept',
-    'Oct',
-    'Nov',
-    'Dec',
-];
-DateFormat.Months = [
-    'January',
-    'February',
-    'March',
-    'April',
-    'May',
-    'June',
-    'July',
-    'August',
-    'September',
-    'October',
-    'November',
-    'December',
-];
 
 
 
@@ -10628,6 +10215,7 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */ });
 // 封装操作 IndexedDB 的一些公共方法，仅满足本程序使用，并不完善
 class IndexedDB {
+    db;
     async open(DBName, DBVer, onUpgrade) {
         return new Promise((resolve, reject) => {
             const request = indexedDB.open(DBName, DBVer);
@@ -10690,14 +10278,13 @@ class IndexedDB {
     // 向一个存储库中批量添加数据
     async batchAddData(storeName, dataList, key) {
         return new Promise(async (resolve, reject) => {
-            var _a;
             if (dataList.length === 0) {
                 resolve();
             }
             // 获取已存在的 key
             const existedKeys = (await this.getAllKeys(storeName));
             // 使用事务
-            const tr = (_a = this.db) === null || _a === void 0 ? void 0 : _a.transaction(storeName, 'readwrite');
+            const tr = this.db?.transaction(storeName, 'readwrite');
             if (!tr) {
                 throw new Error(`transaction ${storeName} is undefined`);
             }
@@ -10882,6 +10469,21 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */   Utils: () => (/* binding */ Utils)
 /* harmony export */ });
 class Utils {
+    // 不安全的字符，这里多数是控制字符，需要替换掉
+    static unsafeStr = new RegExp(/[\u0000\u0001-\u001f\u007f-\u009f\u00ad\u0600-\u0605\u061c\u06dd\u070f\u08e2\u180e\u2000-\u200f\u202a-\u202f\u205f\u2060-\u2064\u2066-\u206f\ufdd0-\ufdef\ufeff\ufff9-\ufffb\ufffe\uffff]/g);
+    // 一些需要替换成全角字符的符号，左边是正则表达式的字符
+    static fullWidthDict = [
+        ['\\\\', '＼'],
+        ['/', '／'],
+        [':', '：'],
+        ['\\?', '？'],
+        ['"', '＂'],
+        ['<', '＜'],
+        ['>', '＞'],
+        ['\\*', '＊'],
+        ['\\|', '｜'],
+        ['~', '～'],
+    ];
     // reg 预先创建，而不是运行时创建，因为运行时重复创建太多次了
     // 用正则去掉不安全的字符
     static replaceUnsafeStr(str) {
@@ -11117,21 +10719,6 @@ class Utils {
         return new Promise((res) => window.setTimeout(res, time));
     }
 }
-// 不安全的字符，这里多数是控制字符，需要替换掉
-Utils.unsafeStr = new RegExp(/[\u0001-\u001f\u007f-\u009f\u00ad\u0600-\u0605\u061c\u06dd\u070f\u08e2\u180e\u200b-\u200f\u202a-\u202e\u2060-\u2064\u2066-\u206f\ufdd0-\ufdef\ufeff\ufff9-\ufffb\ufffe\uffff]/g);
-// 一些需要替换成全角字符的符号，左边是正则表达式的字符
-Utils.fullWidthDict = [
-    ['\\\\', '＼'],
-    ['/', '／'],
-    [':', '：'],
-    ['\\?', '？'],
-    ['"', '＂'],
-    ['<', '＜'],
-    ['>', '＞'],
-    ['\\*', '＊'],
-    ['\\|', '｜'],
-    ['~', '～'],
-];
 
 
 

@@ -4,6 +4,7 @@ import { EVT } from './EVT'
 import { store } from './Store'
 import { lang } from './Lang'
 import { DateFormat } from './utils/DateFormat'
+import { Utils } from './utils/Utils'
 import { settings } from './setting/Settings'
 import { Config } from './Config'
 
@@ -13,30 +14,12 @@ class FileName {
       this.previewFileName()
     })
   }
-  // 用正则过滤不安全的字符，（Chrome 和 Windows 不允许做文件名的字符）
-  // 不安全的字符，这里多数是控制字符，需要替换掉
-  private unsafeStr = new RegExp(
-    /[\u0001-\u001f\u007f-\u009f\u00ad\u0600-\u0605\u061c\u06dd\u070f\u08e2\u180e\u200b-\u200f\u202a-\u202e\u2060-\u2064\u2066-\u206f\ufdd0-\ufdef\ufeff\ufff9-\ufffb\ufffe\uffff]/g,
-  )
-  // 一些需要替换成全角字符的符号，左边是正则表达式的字符
-  private fullWidthDict: string[][] = [
-    ['\\\\', '＼'],
-    ['/', '／'],
-    [':', '：'],
-    ['\\?', '？'],
-    ['"', '＂'],
-    ['<', '＜'],
-    ['>', '＞'],
-    ['\\*', '＊'],
-    ['\\|', '｜'],
-    ['~', '～'],
-  ]
 
   // 把一些特殊字符替换成全角字符
   private replaceUnsafeStr(str: string) {
-    str = str.replace(this.unsafeStr, '')
-    for (let index = 0; index < this.fullWidthDict.length; index++) {
-      const rule = this.fullWidthDict[index]
+    str = str.replace(Utils.unsafeStr, '')
+    for (let index = 0; index < Utils.fullWidthDict.length; index++) {
+      const rule = Utils.fullWidthDict[index]
       const reg = new RegExp(rule[0], 'g')
       str = str.replace(reg, rule[1])
     }

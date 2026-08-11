@@ -6,7 +6,13 @@ import { store } from './Store'
 import { log } from './Log'
 import { EVT } from './EVT'
 import { saveData } from './SaveData'
-import { PostList, Post, SupportPostList, TagPostList, PostBody } from './CrawlResult.d'
+import {
+  PostList,
+  Post,
+  SupportPostList,
+  TagPostList,
+  PostBody,
+} from './CrawlResult.d'
 import { API } from './API'
 import { states } from './States'
 import { msgBox } from './MsgBox'
@@ -376,11 +382,7 @@ abstract class InitPageBase {
           const data: any = await API.request(nextUrl)
           list = data.body.commentList
         } else {
-          const data = await API.getPostComments(
-            post.id,
-            items.length,
-            limit,
-          )
+          const data = await API.getPostComments(post.id, items.length, limit)
           list = data.body.commentList
         }
         crawlInterval.addTime()

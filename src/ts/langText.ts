@@ -518,6 +518,15 @@ So the file name set by the downloader is lost, and the file name becomes the la
     '게시물의 <span class="key">텍스트</span> 저장',
     'Сохранить <span class="key">текст</span> в публикациях',
   ],
+  _格式: [`格式：`, `格式：`, `Format:`, `形式：`, `형식:`, `Формат:`],
+  _保存投稿中的文字的说明: [
+    `你可以设置是否保存投稿的正文文本。<br><br>有两种格式可以选择：<br>1. TXT：由于 TXT 文件里只能保存纯文本，所以查看它时不会显示投稿里的图片、视频、超链接等内容。<br>2. HTML：查看时可以显示投稿里的图片、视频、超链接等内容，阅读体验更好。<br><br>另外，由于每篇投稿的外部链接、正文、评论都会保存到同一个文件里，所以这个设置里的格式就是这些内容的保存格式。<br>PS：如果你关闭了这个设置，那么外部链接和评论总是会保存到 TXT 文件里。`,
+    `你可以設定是否儲存投稿的正文文字。<br><br>有兩種格式可以選擇：<br>1. TXT：由於 TXT 檔案只能儲存純文字，查看時不會顯示投稿中的圖片、影片、超連結等內容。<br>2. HTML：查看時可以顯示投稿中的圖片、影片、超連結等內容，閱讀體驗更好。<br><br>此外，由於每篇投稿的外部連結、正文、評論都會儲存在同一個檔案裡，所以此設定中的格式就是這些內容的儲存格式。<br>PS：如果你關閉了這個設定，外部連結和評論一律會儲存到 TXT 檔案裡。`,
+    `You can choose whether to save the main text of posts.<br><br>There are two available formats:<br>1. TXT: Because TXT files can only contain plain text, images, videos, hyperlinks, and other content in the post will not be displayed when viewing them.<br>2. HTML: Images, videos, hyperlinks, and other content in the post can be displayed when viewing it, providing a better reading experience.<br><br>In addition, each post's external links, main text, and comments are saved in the same file, so this setting determines the format used to save all of that content.<br>PS: If you turn off this setting, external links and comments are always saved in a TXT file.`,
+    `投稿の本文テキストを保存するかどうかを設定できます。<br><br>選択できる形式は2種類あります。<br>1. TXT：TXT ファイルにはプレーンテキストしか保存できないため、投稿内の画像、動画、ハイパーリンクなどは表示されません。<br>2. HTML：投稿内の画像、動画、ハイパーリンクなどを表示できるため、より快適に閲覧できます。<br><br>また、各投稿の外部リンク、本文、コメントは同じファイルに保存されるため、この設定の形式はこれらの内容の保存形式になります。<br>PS：この設定をオフにした場合、外部リンクとコメントは常に TXT ファイルに保存されます。`,
+    `게시물의 본문 텍스트를 저장할지 설정할 수 있습니다.<br><br>선택할 수 있는 형식은 두 가지입니다.<br>1. TXT: TXT 파일에는 일반 텍스트만 저장할 수 있으므로 게시물의 이미지, 동영상, 하이퍼링크 등의 내용은 볼 때 표시되지 않습니다.<br>2. HTML: 게시물의 이미지, 동영상, 하이퍼링크 등의 내용을 표시할 수 있어 더 나은 읽기 경험을 제공합니다.<br><br>또한 각 게시물의 외부 링크, 본문, 댓글은 같은 파일에 저장되므로 이 설정의 형식이 이러한 내용의 저장 형식이 됩니다.<br>PS: 이 설정을 끄면 외부 링크와 댓글은 항상 TXT 파일에 저장됩니다.`,
+    `Вы можете выбрать, сохранять ли основной текст публикаций.<br><br>Доступны два формата:<br>1. TXT: поскольку в TXT-файлах можно сохранить только обычный текст, изображения, видео, гиперссылки и другое содержимое публикации при просмотре не будут отображаться.<br>2. HTML: при просмотре могут отображаться изображения, видео, гиперссылки и другое содержимое публикации, что делает чтение удобнее.<br><br>Кроме того, внешние ссылки, основной текст и комментарии каждой публикации сохраняются в одном файле, поэтому этот параметр определяет формат сохранения всего этого содержимого.<br>PS: если отключить этот параметр, внешние ссылки и комментарии всегда будут сохраняться в TXT-файл.`,
+  ],
   _保存投稿中的评论: [
     '保存投稿中的<span class="key">评论</span>',
     '儲存投稿中的<span class="key">評論</span>',
@@ -899,17 +908,17 @@ So the file name set by the downloader is lost, and the file name becomes the la
     'Поддержать меня',
   ],
   _赞助方式提示: [
-    `如果您觉得这个工具对您有帮助，可以考虑赞助我，谢谢！<br>
+    `如果您觉得这个工具对您有帮助，可以考虑赞助我，谢谢~<br>
     您可以在 Patreon 上赞助我：<br>
-    <a href="https://www.patreon.com/xuejianxianzun" target="_blank">https://www.patreon.com/xuejianxianzun</a><br><br>
+    <a href="https://www.patreon.com/xuejianxianzun" target="_blank">https://www.patreon.com/xuejianxianzun</a><br>
     中国大陆用户可以在“爱发电”上赞助我：<br>
-    <a href="https://afdian.com/a/xuejianxianzun" target="_blank">https://afdian.com/a/xuejianxianzun</a><br><br>
+    <a href="https://afdian.com/a/xuejianxianzun" target="_blank">https://afdian.com/a/xuejianxianzun</a><br>
     也可以扫描二维码：<br>
     <a href="https://github.com/xuejianxianzun/PixivBatchDownloader#%E6%94%AF%E6%8C%81%E5%92%8C%E6%8D%90%E5%8A%A9" target="_blank">在 Github 上查看二维码</a>
     `,
-    `如果您覺得這個工具對您有幫助，可以考慮贊助我，謝謝！<br>
+    `如果您覺得這個工具對您有幫助，可以考慮贊助我，謝謝~<br>
     您可以在 Patreon 上贊助我：<br>
-    <a href="https://www.patreon.com/xuejianxianzun" target="_blank">https://www.patreon.com/xuejianxianzun</a><br><br>
+    <a href="https://www.patreon.com/xuejianxianzun" target="_blank">https://www.patreon.com/xuejianxianzun</a><br>
     中國大陸使用者可以在“愛發電”上贊助我：<br>
     <a href="https://afdian.com/a/xuejianxianzun" target="_blank">https://afdian.com/a/xuejianxianzun</a>
     `,
@@ -1965,14 +1974,40 @@ Firefox 브라우저는 Firefox Add-ons에서 설치할 수 있습니다.<br><a 
 Браузеры на базе Chromium, например Chrome и Edge, можно установить из Chrome Web Store:<br><a href="https://chromewebstore.google.com/detail/powerful-pixiv-downloader/dkndmhgdcmjdmkdonmbgjpijejdcilfh" target="_blank">Powerful Pixiv Downloader</a><br><br>
 Для Firefox его можно установить из Firefox Add-ons:<br><a href="https://addons.mozilla.org/en-US/firefox/addon/powerfulpixivdownloader/" target="_blank">Powerful Pixiv Downloader</a><br>`,
   ],
-  _更新说明4_9_3: [
-    `🐞Fanbox 的 API 变化导致下载器无法抓取文章列表，现在修复。`,
-    `🐞Fanbox 的 API 變化導致下載器無法抓取文章列表，現在修復。`,
-    `🐞The API change of Fanbox caused the downloader to fail to crawl the post list, now fixed.`,
-    `🐞Fanbox の API の変更により、ダウンローダーが投稿リストをクロールできなくなりましたが、現在修正されています。`,
-    `🐞Fanbox의 API 변경으로 인해 다운로더가 게시물 목록을 크롤링하지 못했지만 이제 수정되었습니다.`,
-    `🐞Изменение API Fanbox привело к тому, что загрузчик не смог сканировать список публикаций, теперь исправлено.`,
+  _更新说明5_0_0: [
+    `<strong>✨在保存投稿中的文字时，新增了 HTML 格式</strong><br>
+之前该设置只有 TXT 格式，查看时不会显示投稿里的图片、视频等内容。新增的 HTML 格式可以显示这些内容，阅读体验接近 Fanbox 的网页浏览效果。<br>
+感谢 <a href="https://github.com/Eganchiyu" target="_blank">Eganchiyu</a> 提交了该功能。<br>
+<strong>✨新增设置：保存投稿中的评论</strong><br>
+感谢 <a href="https://github.com/Eganchiyu" target="_blank">Eganchiyu</a> 提交了该功能。`,
+    `<strong>✨儲存投稿中的文字時，新增了 HTML 格式</strong><br>
+之前此設定只有 TXT 格式，查看時不會顯示投稿中的圖片、影片等內容。新增的 HTML 格式可以顯示這些內容，閱讀體驗接近 Fanbox 的網頁瀏覽效果。<br>
+感謝 <a href="https://github.com/Eganchiyu" target="_blank">Eganchiyu</a> 提交了此功能。<br>
+<strong>✨新增設定：儲存投稿中的評論</strong><br>
+感謝 <a href="https://github.com/Eganchiyu" target="_blank">Eganchiyu</a> 提交了此功能。`,
+    `<strong>✨ Added HTML format when saving text in posts</strong><br>
+Previously, this setting only supported TXT format, which did not display images, videos, and other content from posts when viewed. The new HTML format displays this content, offering a reading experience close to browsing Fanbox on the web.<br>
+Thanks to <a href="https://github.com/Eganchiyu" target="_blank">Eganchiyu</a> for contributing this feature.<br>
+<strong>✨ New setting: Save comments in posts</strong><br>
+Thanks to <a href="https://github.com/Eganchiyu" target="_blank">Eganchiyu</a> for contributing this feature.`,
+    `<strong>✨投稿内のテキスト保存に HTML 形式を追加</strong><br>
+以前はこの設定で TXT 形式しか選択できず、閲覧時に投稿内の画像、動画などは表示されませんでした。新しい HTML 形式ではこれらの内容を表示でき、Fanbox のウェブページに近い閲覧体験を得られます。<br>
+この機能を提供してくださった <a href="https://github.com/Eganchiyu" target="_blank">Eganchiyu</a> に感謝します。<br>
+<strong>✨新しい設定：投稿内のコメントを保存</strong><br>
+この機能を提供してくださった <a href="https://github.com/Eganchiyu" target="_blank">Eganchiyu</a> に感謝します。`,
+    `<strong>✨게시물의 텍스트를 저장할 때 HTML 형식 추가</strong><br>
+이전에는 이 설정에서 TXT 형식만 지원했으며, 볼 때 게시물의 이미지, 동영상 등의 내용이 표시되지 않았습니다. 새 HTML 형식은 이러한 내용을 표시할 수 있어 Fanbox 웹페이지를 보는 것과 가까운 읽기 경험을 제공합니다.<br>
+이 기능을 기여해 주신 <a href="https://github.com/Eganchiyu" target="_blank">Eganchiyu</a>님께 감사드립니다.<br>
+<strong>✨새 설정: 게시물의 댓글 저장</strong><br>
+이 기능을 기여해 주신 <a href="https://github.com/Eganchiyu" target="_blank">Eganchiyu</a>님께 감사드립니다.`,
+    `<strong>✨ Добавлен формат HTML при сохранении текста публикаций</strong><br>
+Ранее в этой настройке был доступен только формат TXT, при просмотре которого изображения, видео и другое содержимое публикаций не отображались. Новый формат HTML позволяет отображать это содержимое и делает чтение ближе к просмотру страницы Fanbox в браузере.<br>
+Спасибо <a href="https://github.com/Eganchiyu" target="_blank">Eganchiyu</a> за добавление этой функции.<br>
+<strong>✨ Новая настройка: сохранять комментарии к публикациям</strong><br>
+Спасибо <a href="https://github.com/Eganchiyu" target="_blank">Eganchiyu</a> за добавление этой функции.`,
   ],
+  _说明: [`说明`, `說明`, `Explanation`, `説明`, `설명`, `Описание`],
+  _帮助: [`帮助`, `幫助`, `Help`, `ヘルプ`, `도움말`, `Справка`],
   _开始获取投稿列表: [
     `开始获取投稿列表`,
     `開始取得投稿清單`,
@@ -1991,4 +2026,6 @@ Firefox 브라우저는 Firefox Add-ons에서 설치할 수 있습니다.<br><a 
   ],
 }
 
-export { langText }
+type LangTextKey = keyof typeof langText
+
+export { langText, LangTextKey }

@@ -56,12 +56,12 @@ class CenterPanel {
       <div class="centerWrap_con beautify_scrollbar">
       <slot data-name="form"></slot>
 
-      <div class="help_bar gray1"> 
-      <button class="textButton gray1" id="showDownTip" type="button" data-xztext="_常见问题"></button>
-      <button class="textButton gray1" id="showRecentUpdates" type="button" data-xztext="_最近更新"></button>
-      <a class="gray1" href="https://discord.gg/u4wVMy7xJM" target="_blank">Discord</a>
-      <button class="textButton gray1" id="xzPixivDownloader" type="button" data-xztext="_pixivDownloader"></button>
-      <button class="textButton gray1" id="showPatronTip" type="button" data-xztext="_赞助我"></button>
+      <div class="help_bar gray"> 
+      <button class="textButton gray" id="showDownTip" type="button" data-xztext="_常见问题"></button>
+      <button class="textButton gray" id="showRecentUpdates" type="button" data-xztext="_最近更新"></button>
+      <a class="gray" href="https://discord.gg/u4wVMy7xJM" target="_blank">Discord</a>
+      <button class="textButton gray" id="xzPixivDownloader" type="button" data-xztext="_pixivDownloader"></button>
+      <button class="textButton gray" id="showPatronTip" type="button" data-xztext="_赞助我"></button>
       </div>
       
       </div>

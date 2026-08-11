@@ -18,8 +18,8 @@ class ShowWhatIsNew {
     })
   }
 
-  private flag = '4.9.4' as const
-  private textKey = '_更新说明4_9_3' as const
+  private flag = '5.0.0' as const
+  private textKey = '_更新说明5_0_0' as const
 
   private show() {
     // 如果这个标记是初始值，说明用户是首次安装这个扩展，或者重置了设置，此时不显示更新说明
@@ -45,7 +45,6 @@ class ShowWhatIsNew {
       <br>
       <br>
       <div>${lang.transl(this.textKey)}</div>
-      <br>
       <br>
       ${lang.transl('_赞助方式提示')}`
     msgBox.show(msg, {

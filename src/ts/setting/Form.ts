@@ -10,6 +10,7 @@ import { lang } from '../Lang'
 import { options } from './Options'
 import { msgBox } from '../MsgBox'
 import { theme } from '../Theme'
+import { LangTextKey } from '../langText'
 
 // 设置表单
 class Form {
@@ -30,6 +31,7 @@ class Form {
     new FormSettings(this.form)
 
     this.bindEvents()
+    this.showMsgWhenClickBtn()
   }
 
   public form: SettingsForm
@@ -269,6 +271,22 @@ class Form {
         subOption.style.display = input.checked ? 'inline' : 'none'
       }
     }
+  }
+
+  /**点击一些按钮时，通过 msgBox 显示帮助 */
+  private showMsgWhenClickBtn() {
+    const btns = this.form.querySelectorAll(
+      '.showMsgBtn',
+    ) as NodeListOf<HTMLButtonElement>
+    btns.forEach((btn) => {
+      btn.addEventListener('click', () => {
+        const title = btn.dataset.title! as LangTextKey
+        const msg = btn.dataset.msg! as LangTextKey
+        msgBox.show(lang.transl(msg), {
+          title: lang.transl(title),
+        })
+      })
+    })
   }
 
   // 是否显示提示

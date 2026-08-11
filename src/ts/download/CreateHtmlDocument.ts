@@ -316,8 +316,8 @@ class CreateHtmlDocument {
     }
     return safeUrl
       ? `<p class="${className}"><a href="${Tools.escapeHtml(
-        safeUrl,
-      )}" rel="noopener noreferrer">${content}</a></p>`
+          safeUrl,
+        )}" rel="noopener noreferrer">${content}</a></p>`
       : content
         ? `<p class="${className}">${content}</p>`
         : ''
@@ -480,8 +480,8 @@ class CreateHtmlDocument {
         const downloadedImage =
           tag === 'img'
             ? result.files.find(
-              (file) => file.fileID === this.getImageFileId(sourceUrls[0]),
-            )
+                (file) => file.fileID === this.getImageFileId(sourceUrls[0]),
+              )
             : undefined
         if (downloadedImage) {
           const imagePath = fileName.getFileName({

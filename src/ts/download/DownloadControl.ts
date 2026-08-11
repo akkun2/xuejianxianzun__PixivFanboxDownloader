@@ -436,7 +436,10 @@ class DownloadControl {
 
   // 查找需要进行下载的作品，建立下载
   // 可选第二个参数：使用缩略图 url 而不是原图 url 进行下载
-  private async createDownload(progressBarIndex: number, useThumb: boolean = false) {
+  private async createDownload(
+    progressBarIndex: number,
+    useThumb: boolean = false,
+  ) {
     const index = downloadStates.getFirstDownloadItem()
 
     if (index === undefined) {
@@ -524,9 +527,7 @@ class DownloadControl {
         taskBatch: this.taskBatch,
         // 仅 HTML 文本需要覆盖，避免附件和图片被同名文件覆盖
         conflictAction:
-          'text' in result && result.ext === 'html'
-            ? 'overwrite'
-            : undefined,
+          'text' in result && result.ext === 'html' ? 'overwrite' : undefined,
       }
 
       // 保存任务信息

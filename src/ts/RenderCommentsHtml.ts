@@ -109,15 +109,16 @@ class RenderCommentsHtml {
     const meta = `${Tools.escapeHtml(user)} · ${DateFormat.format(comment.createdDatetime, 'YYYY-MM-DD hh:mm:ss')}`
     const avatar = avatarUrl
       ? `<img class="comment-icon" src="${Tools.escapeHtml(
-        avatarUrl,
-      )}" alt="" loading="lazy">`
+          avatarUrl,
+        )}" alt="" loading="lazy">`
       : ''
     const body = Tools.escapeHtml(comment.body || '')
     const replies = comment.replies
       .map((reply) => this.renderCommentHtml(reply, avatarMap))
       .join('\n')
-    return `<div class="comment">${avatar}<div class="comment-main"><p class="comment-meta">${meta}</p><div class="comment-body">${body}</div>${replies ? `<div class="comment-replies">${replies}</div>` : ''
-      }</div></div>`
+    return `<div class="comment">${avatar}<div class="comment-main"><p class="comment-meta">${meta}</p><div class="comment-body">${body}</div>${
+      replies ? `<div class="comment-replies">${replies}</div>` : ''
+    }</div></div>`
   }
 
   /** 用户没有自定义头像时显示的默认头像 */

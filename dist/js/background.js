@@ -13,9 +13,9 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */   totalDownload: () => (/* binding */ totalDownload)
 /* harmony export */ });
 class TotalDownload {
+    /** 记录每天的下载总体积。key 是当天的 date，value 是当天的下载总量（字节数） */
+    data = {};
     constructor() {
-        /** 记录每天的下载总体积。key 是当天的 date，value 是当天的下载总量（字节数） */
-        this.data = {};
         this.init();
     }
     init() {
@@ -248,7 +248,6 @@ const UUIDRegexp = /[0-9a-z]{8}-[0-9a-z]{4}-[0-9a-z]{4}-[0-9a-z]{4}-[0-9a-z]{12}
 // 监听下载事件
 // 每个下载会触发两次 onChanged 事件
 chrome.downloads.onChanged.addListener(async function (detail) {
-    var _a, _b, _c;
     // 根据 detail.id 取出保存的数据
     // 如果有数据，就是本扩展建立的下载，所以不会监听到非本扩展建立的下载
     let data = dlData[detail.id];
@@ -288,14 +287,14 @@ chrome.downloads.onChanged.addListener(async function (detail) {
             const expectedName = fileNameList.get(data.url);
             if (expectedName) {
                 // 取出预期的文件名的最后一部分，上面的文件名的结果是 "0"
-                const name = ((_a = expectedName.split('/').pop()) === null || _a === void 0 ? void 0 : _a.split('.')[0]) || '';
+                const name = expectedName.split('/').pop()?.split('.')[0] || '';
                 // 取出实际的文件名的最后一部分（注意，即使是与预期一致的文件名，实际上也可能有序号）
                 let name2 = '';
                 if (changedName.includes('\\')) {
-                    name2 = ((_b = changedName.split('\\').pop()) === null || _b === void 0 ? void 0 : _b.split('.')[0]) || '';
+                    name2 = changedName.split('\\').pop()?.split('.')[0] || '';
                 }
                 else {
-                    name2 = ((_c = changedName.split('/').pop()) === null || _c === void 0 ? void 0 : _c.split('.')[0]) || '';
+                    name2 = changedName.split('/').pop()?.split('.')[0] || '';
                 }
                 // 如果实际文件名不是以预期的文件名开头，则说明文件名异常
                 if (name2 && name2.startsWith(name) === false) {
